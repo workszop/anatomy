@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anatomy of a Website</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .stage {
+            display: none;
+        }
+        .stage.active {
+            display: block;
+        }
+        .custom-css h3 {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #6610f2;
+        }
+        .custom-css p {
+            font-size: 1.2rem;
+            color: #495057;
+        }
+        .custom-css ul {
+            border-left: 4px solid #6610f2;
+            padding-left: 10px;
+            list-style-type: none;
+        }
+        .custom-css li {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            padding: 8px;
+            transition: background-color 0.3s;
+        }
+        .custom-css li:hover {
+            background-color: #e2e6ea;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <h1 class="text-primary text-center mb-3">Anatomy of a Website</h1>
+        <p id="description" class="lead text-center mb-4">Stage 1: Plain Text</p>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div id="stage1" class="stage active">
+<pre class="mb-0">
+My Website
+
+Welcome to my website.
+
+- Feature 1
+- Feature 2
+</pre>
+                </div>
+
+                <div id="stage2" class="stage">
+                    <h3>My Website</h3>
+                    <p>Welcome to my website.</p>
+                    <ul>
+                        <li>Feature 1</li>
+                        <li>Feature 2</li>
+                    </ul>
+                </div>
+
+                <div id="stage3" class="stage custom-css">
+                    <h3>My Website</h3>
+                    <p>Welcome to my website with enhanced CSS!</p>
+                    <ul>
+                        <li>Feature 1</li>
+                        <li>Feature 2</li>
+                    </ul>
+                </div>
+
+                <div id="stage4" class="stage custom-css">
+                    <h3>Interactive Features</h3>
+                    <p>Customize features using JavaScript:</p>
+                    <div class="mb-3">
+                        <h5>Dynamic Feature List:</h5>
+                        <ul id="feature-list">
+                            <li>Initial Feature</li>
+                        </ul>
+                        <button onclick="addFeature()" class="btn btn-success btn-sm">Add Feature</button>
+                        <button onclick="removeFeature()" class="btn btn-danger btn-sm">Remove Feature</button>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Feature Background Color:</label>
+                        <input type="color" id="feature-bg-color" class="form-control form-control-color" value="#f8f9fa">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Feature Font:</label>
+                        <select id="feature-font" class="form-select">
+                            <option value="Arial">Arial</option>
+                            <option value="Georgia">Georgia</option>
+                            <option value="Courier New">Courier New</option>
+                            <option value="Tahoma">Tahoma</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <button onclick="showStage(1)" class="btn btn-outline-primary">Plain Text</button>
+            <button onclick="showStage(2)" class="btn btn-outline-primary">HTML</button>
+            <button onclick="showStage(3)" class="btn btn-outline-primary">CSS</button>
+            <button onclick="showStage(4)" class="btn btn-outline-primary">JavaScript</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function showStage(n) {
+            document.querySelectorAll('.stage').forEach(stage => stage.classList.remove('active'));
+            document.getElementById('stage' + n).classList.add('active');
+
+            const descriptions = ["Plain Text", "HTML Structured Text", "Enhanced Styling with CSS", "Dynamic Interactivity with JavaScript"];
+            document.getElementById('description').innerText = `Stage ${n}: ${descriptions[n-1]}`;
+        }
+
+        function addFeature() {
+            const ul = document.getElementById('feature-list');
+            const li = document.createElement('li');
+            li.textContent = `Feature ${ul.children.length + 1}`;
+            ul.appendChild(li);
+        }
+
+        function removeFeature() {
+            const ul = document.getElementById('feature-list');
+            if (ul.children.length > 0) {
+                ul.removeChild(ul.lastChild);
+            }
+        }
+
+        document.getElementById('feature-bg-color').addEventListener('input', function() {
+            document.querySelectorAll('#feature-list li').forEach(li => li.style.backgroundColor = this.value);
+        });
+
+        document.getElementById('feature-font').addEventListener('change', function() {
+            document.querySelectorAll('#feature-list li').forEach(li => li.style.fontFamily = this.value);
+        });
+
+        showStage(1);
+    </script>
+</body>
+</html>
