@@ -4,145 +4,775 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Anatomy of a Website</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        .stage {
-            display: none;
+        :root {
+            --bg-main:#FFFFFF;--bg-section:#F9F9F9;--accent:#1E3932;
+            --text-heading:#1A1A1A;--text-body:#666666;
+            --border:#F0F0F0;--border-hover:#E0E0E0;
+            --radius-sm:4px;--radius-md:8px;--radius-lg:12px;
+            --shadow-sm:0 1px 2px rgba(0,0,0,0.04);--transition:150ms ease;
+            --color-text:#64748B;--color-html:#C2410C;--color-css:#7C3AED;--color-js:#D97706;
         }
-        .stage.active {
-            display: block;
-        }
-        .custom-css h3 {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #6610f2;
-        }
-        .custom-css p {
-            font-size: 1.2rem;
-            color: #495057;
-        }
-        .custom-css ul {
-            border-left: 4px solid #6610f2;
-            padding-left: 10px;
-            list-style-type: none;
-        }
-        .custom-css li {
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            margin-bottom: 6px;
-            padding: 8px;
-            transition: background-color 0.3s;
-        }
-        .custom-css li:hover {
-            background-color: #e2e6ea;
-        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:15px;line-height:1.6;color:var(--text-body);background:var(--bg-main);-webkit-font-smoothing:antialiased;}
+        ::selection{background:var(--accent);color:white;}
+        ::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:var(--bg-section);}::-webkit-scrollbar-thumb{background:#ddd;border-radius:10px;}
+        h1,h2,h3,h4{color:var(--text-heading);font-weight:700;letter-spacing:-0.02em;line-height:1.2;}
+        h1{font-size:2.2rem;}h2{font-size:1.5rem;}h3{font-size:1.15rem;}
+        .label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-body);}
+        .app-header{padding:28px 24px 20px;max-width:1280px;margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;position:relative;}
+        .app-header p{margin-top:6px;max-width:640px;}
+        .main-container{max-width:1280px;margin:0 auto;padding:0 24px 64px;}
+        .lang-toggle{display:inline-flex;border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;flex-shrink:0;}
+        .lang-btn{padding:8px 16px;font-size:12px;font-weight:600;font-family:'Inter',sans-serif;border:none;background:var(--bg-main);color:var(--text-body);cursor:pointer;transition:all var(--transition);}
+        .lang-btn:not(:last-child){border-right:1px solid var(--border);}
+        .lang-btn.active{background:var(--accent);color:white;}
+        .lang-btn:hover:not(.active){background:var(--bg-section);}
+        .layer-strip{display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap;}
+        .layer-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;border-radius:var(--radius-md);border:2px solid var(--border);background:var(--bg-main);color:var(--text-body);cursor:pointer;transition:all var(--transition);user-select:none;}
+        .layer-btn:hover{border-color:var(--border-hover);}
+        .layer-btn .dot{width:10px;height:10px;border-radius:50%;opacity:0.3;transition:opacity var(--transition);}
+        .layer-btn.active{color:var(--text-heading);}
+        .layer-btn.active .dot{opacity:1;}
+        .layer-btn[data-layer="text"] .dot{background:var(--color-text);}
+        .layer-btn[data-layer="html"] .dot{background:var(--color-html);}
+        .layer-btn[data-layer="css"] .dot{background:var(--color-css);}
+        .layer-btn[data-layer="js"] .dot{background:var(--color-js);}
+        .layer-btn[data-layer="text"].active{border-color:var(--color-text);}
+        .layer-btn[data-layer="html"].active{border-color:var(--color-html);}
+        .layer-btn[data-layer="css"].active{border-color:var(--color-css);}
+        .layer-btn[data-layer="js"].active{border-color:var(--color-js);}
+        .status-bar{display:flex;gap:16px;padding:10px 16px;background:var(--bg-section);border:1px solid var(--border);border-radius:var(--radius-md);margin-bottom:20px;font-size:12px;color:var(--text-body);flex-wrap:wrap;}
+        .status-item{display:flex;align-items:center;gap:6px;}
+        .status-dot{width:8px;height:8px;border-radius:50%;opacity:0.25;transition:opacity 0.3s;}
+        .status-dot.on{opacity:1;}
+        .steps-track{display:flex;gap:4px;margin-bottom:24px;}
+        .step-dot{flex:1;height:4px;border-radius:2px;background:var(--border);transition:background 0.3s;}
+        .step-dot.done{background:var(--accent);}
+        .workspace{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:32px;}
+        .pane{background:var(--bg-main);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;display:flex;flex-direction:column;}
+        .pane-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--bg-section);border-bottom:1px solid var(--border);}
+        .pane-header-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-heading);display:flex;align-items:center;gap:8px;}
+        .pane-body{flex:1;overflow:auto;}
+        .file-tabs{display:flex;background:#f3f3f3;border-bottom:1px solid var(--border);overflow-x:auto;min-height:38px;}
+        .file-tab{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;font-size:12px;font-weight:600;font-family:'JetBrains Mono',monospace;border:none;background:transparent;color:var(--text-body);cursor:pointer;border-bottom:2px solid transparent;transition:all var(--transition);white-space:nowrap;}
+        .file-tab:hover{color:var(--text-heading);background:rgba(0,0,0,0.02);}
+        .file-tab.active{color:var(--text-heading);background:var(--bg-main);border-bottom-color:var(--accent);}
+        .file-tab .tab-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+        .code-editor{position:relative;min-height:500px;}
+        .code-editor textarea{width:100%;min-height:500px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.65;border:none;outline:none;resize:none;background:transparent;color:var(--text-heading);tab-size:2;white-space:pre;overflow-wrap:normal;overflow-x:auto;}
+        .preview-frame{width:100%;min-height:500px;border:none;background:white;}
+        .intro-section{background:var(--bg-section);border:1px solid var(--border);border-radius:var(--radius-lg);padding:32px;margin-bottom:32px;}
+        .intro-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+        .intro-card{background:var(--bg-main);border:1px solid var(--border);border-radius:var(--radius-md);padding:20px;transition:transform var(--transition);}
+        .intro-card:hover{transform:translateY(-2px);}
+        .intro-card .badge{display:inline-block;padding:3px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;border-radius:var(--radius-sm);margin-bottom:10px;}
+        .intro-card h4{margin-bottom:6px;}
+        .intro-card p{font-size:13px;line-height:1.5;}
+        .intro-card .analogy{margin-top:10px;padding:8px 12px;background:var(--bg-section);border-radius:var(--radius-sm);font-size:12px;color:var(--text-heading);border-left:3px solid var(--accent);}
+        .badge-text{background:#f1f5f9;color:var(--color-text);}
+        .badge-html{background:#fff7ed;color:var(--color-html);}
+        .badge-css{background:#f5f3ff;color:var(--color-css);}
+        .badge-js{background:#fffbeb;color:var(--color-js);}
+        .term{border-bottom:1px dashed currentColor;cursor:help;position:relative;}
+        .term .tip{visibility:hidden;opacity:0;position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--text-heading);color:#fff;padding:8px 12px;border-radius:var(--radius-md);font-size:12px;line-height:1.4;white-space:normal;width:220px;text-align:center;pointer-events:none;transition:opacity var(--transition);z-index:100;}
+        .term .tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--text-heading);}
+        .term:hover .tip{visibility:visible;opacity:1;}
+        @media(max-width:900px){.workspace{grid-template-columns:1fr;}.intro-grid{grid-template-columns:1fr 1fr;}}
+        @media(max-width:600px){h1{font-size:1.6rem;}.intro-grid{grid-template-columns:1fr;}.layer-strip{gap:8px;}.layer-btn{padding:8px 14px;font-size:12px;}.app-header{padding:20px 16px 16px;}.main-container{padding:0 16px 40px;}}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+        .fade-up{animation:fadeUp 0.4s ease forwards;}.delay-1{animation-delay:0.1s;opacity:0;}.delay-2{animation-delay:0.2s;opacity:0;}.delay-3{animation-delay:0.3s;opacity:0;}
     </style>
 </head>
-<body class="bg-light">
-    <div class="container py-5">
-        <h1 class="text-primary text-center mb-3">Anatomy of a Website</h1>
-        <p id="description" class="lead text-center mb-4">Stage 1: Plain Text</p>
+<body>
 
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <div id="stage1" class="stage active">
-<pre class="mb-0">
-My Website
-
-Welcome to my website.
-
-- Feature 1
-- Feature 2
-</pre>
-                </div>
-
-                <div id="stage2" class="stage">
-                    <h3>My Website</h3>
-                    <p>Welcome to my website.</p>
-                    <ul>
-                        <li>Feature 1</li>
-                        <li>Feature 2</li>
-                    </ul>
-                </div>
-
-                <div id="stage3" class="stage custom-css">
-                    <h3>My Website</h3>
-                    <p>Welcome to my website with enhanced CSS!</p>
-                    <ul>
-                        <li>Feature 1</li>
-                        <li>Feature 2</li>
-                    </ul>
-                </div>
-
-                <div id="stage4" class="stage custom-css">
-                    <h3>Interactive Features</h3>
-                    <p>Customize features using JavaScript:</p>
-                    <div class="mb-3">
-                        <h5>Dynamic Feature List:</h5>
-                        <ul id="feature-list">
-                            <li>Initial Feature</li>
-                        </ul>
-                        <button onclick="addFeature()" class="btn btn-success btn-sm">Add Feature</button>
-                        <button onclick="removeFeature()" class="btn btn-danger btn-sm">Remove Feature</button>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Feature Background Color:</label>
-                        <input type="color" id="feature-bg-color" class="form-control form-control-color" value="#f8f9fa">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Feature Font:</label>
-                        <select id="feature-font" class="form-select">
-                            <option value="Arial">Arial</option>
-                            <option value="Georgia">Georgia</option>
-                            <option value="Courier New">Courier New</option>
-                            <option value="Tahoma">Tahoma</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
+<header class="app-header fade-up">
+    <div style="position:absolute;top:28px;right:24px;">
+        <div class="lang-toggle">
+            <button class="lang-btn active" onclick="setLang('en')">EN</button>
+            <button class="lang-btn" onclick="setLang('pl')">PL</button>
         </div>
+    </div>
+    <div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;justify-content:center;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent)"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="m9 15 2 2 4-4"/></svg>
+            <h1 data-i18n="title">Anatomy of a Website</h1>
+        </div>
+        <p data-i18n="subtitle">An interactive simulator showing how plain text, HTML, CSS, and JavaScript work together to build a web page. Toggle each layer, edit code live, and watch the result change in real time.</p>
+    </div>
+</header>
 
-        <div class="text-center mt-4">
-            <button onclick="showStage(1)" class="btn btn-outline-primary">Plain Text</button>
-            <button onclick="showStage(2)" class="btn btn-outline-primary">HTML</button>
-            <button onclick="showStage(3)" class="btn btn-outline-primary">CSS</button>
-            <button onclick="showStage(4)" class="btn btn-outline-primary">JavaScript</button>
+<main class="main-container">
+    <div class="steps-track"><div class="step-dot done" id="step-text"></div><div class="step-dot" id="step-html"></div><div class="step-dot" id="step-css"></div><div class="step-dot" id="step-js"></div></div>
+    <div class="layer-strip">
+        <button class="layer-btn active" data-layer="text" onclick="toggleLayer('text')"><span class="dot"></span><span data-i18n="btn_text">Plain Text</span></button>
+        <button class="layer-btn" data-layer="html" onclick="toggleLayer('html')"><span class="dot"></span><span>+ HTML</span></button>
+        <button class="layer-btn" data-layer="css" onclick="toggleLayer('css')"><span class="dot"></span><span>+ CSS</span></button>
+        <button class="layer-btn" data-layer="js" onclick="toggleLayer('js')"><span class="dot"></span><span>+ JavaScript</span></button>
+    </div>
+    <div class="status-bar">
+        <div class="status-item"><span class="status-dot on" style="background:var(--color-text);" id="sd-text"></span><span data-i18n="status_text">Text: content</span></div>
+        <div class="status-item"><span class="status-dot" style="background:var(--color-html);" id="sd-html"></span><span data-i18n="status_html">HTML: structure</span></div>
+        <div class="status-item"><span class="status-dot" style="background:var(--color-css);" id="sd-css"></span><span data-i18n="status_css">CSS: style</span></div>
+        <div class="status-item"><span class="status-dot" style="background:var(--color-js);" id="sd-js"></span><span data-i18n="status_js">JS: behaviour</span></div>
+    </div>
+
+    <div class="workspace">
+        <div class="pane">
+            <div class="pane-header"><span class="pane-header-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg><span data-i18n="pane_editor">Code Editor</span></span><span class="label" id="editor-lang-label">TXT</span></div>
+            <div class="file-tabs" id="file-tabs"></div>
+            <div class="pane-body"><div class="code-editor"><textarea id="code-editor" spellcheck="false"></textarea></div></div>
+        </div>
+        <div class="pane">
+            <div class="pane-header"><span class="pane-header-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg><span data-i18n="pane_preview">Live Preview</span></span><span class="label">Desktop</span></div>
+            <div class="pane-body"><iframe id="live-preview" class="preview-frame"></iframe></div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function showStage(n) {
-            document.querySelectorAll('.stage').forEach(stage => stage.classList.remove('active'));
-            document.getElementById('stage' + n).classList.add('active');
+    <section class="intro-section fade-up delay-1">
+        <div style="text-align:center;margin-bottom:20px;">
+            <span class="label" data-i18n="intro_label">The Four Layers</span>
+            <h2 style="margin-top:4px;" data-i18n="intro_title">How Websites Are Built</h2>
+        </div>
+        <div class="intro-grid">
+            <div class="intro-card fade-up delay-1"><span class="badge badge-text" data-i18n="layer1_badge">Layer 1</span><h4 data-i18n="layer1_name">Plain Text</h4><p data-i18n="layer1_desc">Raw content — words, data, no formatting.</p><div class="analogy"><strong data-i18n="analogy_word">Analogy:</strong> <span data-i18n="layer1_analogy">Ingredients on a counter — nobody started cooking yet.</span></div></div>
+            <div class="intro-card fade-up delay-1"><span class="badge badge-html" data-i18n="layer2_badge">Layer 2</span><h4><span class="term">HTML<span class="tip" data-i18n="tip_html">HyperText Markup Language — the skeleton giving structure to content.</span></span></h4><p data-i18n="layer2_desc">Adds structure: headings, paragraphs, lists, images.</p><div class="analogy"><strong data-i18n="analogy_word">Analogy:</strong> <span data-i18n="layer2_analogy">Sorting ingredients into labelled bowls so the recipe works.</span></div></div>
+            <div class="intro-card fade-up delay-2"><span class="badge badge-css" data-i18n="layer3_badge">Layer 3</span><h4><span class="term">CSS<span class="tip" data-i18n="tip_css">Cascading Style Sheets — the paint and furniture of your page.</span></span></h4><p data-i18n="layer3_desc">Adds style: colors, fonts, spacing, layout.</p><div class="analogy"><strong data-i18n="analogy_word">Analogy:</strong> <span data-i18n="layer3_analogy">Decorating the cake — frosting, piping, arrangement.</span></div></div>
+            <div class="intro-card fade-up delay-3"><span class="badge badge-js" data-i18n="layer4_badge">Layer 4</span><h4><span class="term">JavaScript<span class="tip" data-i18n="tip_js">A language that makes pages interactive — like a waiter who reacts.</span></span></h4><p data-i18n="layer4_desc">Adds behaviour: click buttons, add to cart, live interactions.</p><div class="analogy"><strong data-i18n="analogy_word">Analogy:</strong> <span data-i18n="layer4_analogy">Hiring a waiter who takes orders and calculates the bill.</span></div></div>
+        </div>
+    </section>
+</main>
 
-            const descriptions = ["Plain Text", "HTML Structured Text", "Enhanced Styling with CSS", "Dynamic Interactivity with JavaScript"];
-            document.getElementById('description').innerText = `Stage ${n}: ${descriptions[n-1]}`;
-        }
+<script>
+/* ==============================================================
+   i18n
+   ============================================================== */
+const I18N={
+en:{title:'Anatomy of a Website',subtitle:'An interactive simulator showing how plain text, HTML, CSS, and JavaScript work together to build a web page. Toggle each layer, edit code live, and watch the result change in real time.',intro_label:'The Four Layers',intro_title:'How Websites Are Built',layer1_badge:'Layer 1',layer1_name:'Plain Text',layer1_desc:'Raw content — words, data, no formatting.',layer1_analogy:'Ingredients on a counter — nobody started cooking yet.',layer2_badge:'Layer 2',layer2_desc:'Adds structure: headings, paragraphs, lists, images.',layer2_analogy:'Sorting ingredients into labelled bowls so the recipe works.',layer3_badge:'Layer 3',layer3_desc:'Adds style: colors, fonts, spacing, layout.',layer3_analogy:'Decorating the cake — frosting, piping, arrangement.',layer4_badge:'Layer 4',layer4_desc:'Adds behaviour: click buttons, add to cart, live interactions.',layer4_analogy:'Hiring a waiter who takes orders and calculates the bill.',analogy_word:'Analogy:',tip_html:'HyperText Markup Language — the skeleton giving structure to content.',tip_css:'Cascading Style Sheets — the paint and furniture of your page.',tip_js:'A language that makes pages interactive — like a waiter who reacts.',btn_text:'Plain Text',status_text:'Text: content',status_html:'HTML: structure',status_css:'CSS: style',status_js:'JS: behaviour',pane_editor:'Code Editor',pane_preview:'Live Preview'},
+pl:{title:'Anatomia Strony Internetowej',subtitle:'Interaktywny symulator pokazujący, jak zwykły tekst, HTML, CSS i JavaScript współpracują, by zbudować stronę. Włączaj warstwy, edytuj kod na żywo i obserwuj zmiany w czasie rzeczywistym.',intro_label:'Cztery warstwy',intro_title:'Jak budowane są strony',layer1_badge:'Warstwa 1',layer1_name:'Zwykły tekst',layer1_desc:'Surowa treść — słowa, dane, bez formatowania.',layer1_analogy:'Składniki na blacie — nikt jeszcze nie gotuje.',layer2_badge:'Warstwa 2',layer2_desc:'Dodaje strukturę: nagłówki, akapity, listy, obrazy.',layer2_analogy:'Sortowanie składników do opisanych misek.',layer3_badge:'Warstwa 3',layer3_desc:'Dodaje styl: kolory, czcionki, odstępy, układ.',layer3_analogy:'Dekorowanie tortu — polewa, zdobienia, układ.',layer4_badge:'Warstwa 4',layer4_desc:'Dodaje zachowanie: kliknięcia, koszyk, interakcje.',layer4_analogy:'Zatrudnienie kelnera, który przyjmuje zamówienia i liczy rachunek.',analogy_word:'Analogia:',tip_html:'HyperText Markup Language — szkielet nadający strukturę treści.',tip_css:'Cascading Style Sheets — farba i meble Twojej strony.',tip_js:'Język programowania — strona staje się interaktywna.',btn_text:'Zwykły tekst',status_text:'Tekst: treść',status_html:'HTML: struktura',status_css:'CSS: styl',status_js:'JS: zachowanie',pane_editor:'Edytor kodu',pane_preview:'Podgląd na żywo'}
+};
+let currentLang='en';
+function setLang(lang){currentLang=lang;document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.textContent.trim()===lang.toUpperCase()));document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(I18N[lang][k]!==undefined)el.textContent=I18N[lang][k];});}
 
-        function addFeature() {
-            const ul = document.getElementById('feature-list');
-            const li = document.createElement('li');
-            li.textContent = `Feature ${ul.children.length + 1}`;
-            ul.appendChild(li);
-        }
+/* ==============================================================
+   STATE + DEMO CONTENT
+   ============================================================== */
+const state={layers:{text:true,html:false,css:false,js:false},activeTab:'content.txt'};
 
-        function removeFeature() {
-            const ul = document.getElementById('feature-list');
-            if (ul.children.length > 0) {
-                ul.removeChild(ul.lastChild);
-            }
-        }
+/* ── Shared CSS for the bakery demo (used by css and js layers) ── */
+const BAKERY_CSS = `@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap');
 
-        document.getElementById('feature-bg-color').addEventListener('input', function() {
-            document.querySelectorAll('#feature-list li').forEach(li => li.style.backgroundColor = this.value);
-        });
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-        document.getElementById('feature-font').addEventListener('change', function() {
-            document.querySelectorAll('#feature-list li').forEach(li => li.style.fontFamily = this.value);
-        });
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  color: #4a3f35;
+  background: #fffcf8;
+  line-height: 1.6;
+}
 
-        showStage(1);
-    </script>
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 32px;
+  height: 60px;
+  background: white;
+  border-bottom: 1px solid #f0ebe4;
+}
+.logo {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: #2d2015;
+  text-decoration: none;
+}
+.nav-links { display: flex; gap: 28px; align-items: center; }
+.nav-links a {
+  text-decoration: none;
+  color: #8b7355;
+  font-size: 13px;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: #2d2015; }
+
+.hero {
+  text-align: center;
+  padding: 80px 24px 72px;
+  background: linear-gradient(180deg, #f7f0e6 0%, #fffcf8 100%);
+}
+.hero-tag {
+  display: inline-block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #b08c5a;
+  font-weight: 600;
+  border: 1px solid #e0d5c4;
+  border-radius: 20px;
+  padding: 5px 16px;
+  margin-bottom: 20px;
+}
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.8rem;
+  color: #2d2015;
+  line-height: 1.15;
+  margin-bottom: 16px;
+  font-weight: 700;
+}
+.hero-sub {
+  color: #8b7355;
+  font-size: 1.05rem;
+  max-width: 420px;
+  margin: 0 auto 32px;
+  line-height: 1.7;
+}
+.hero-btn {
+  display: inline-block;
+  padding: 15px 36px;
+  background: #2d2015;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+}
+.hero-btn:hover {
+  background: #1a1208;
+  transform: translateY(-1px);
+}
+
+.section {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 64px 24px;
+}
+h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  color: #2d2015;
+  text-align: center;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+.section-sub {
+  text-align: center;
+  color: #8b7355;
+  margin-bottom: 40px;
+  font-size: 15px;
+}
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.menu-card {
+  background: white;
+  border: 1px solid #f0ebe4;
+  border-radius: 14px;
+  overflow: hidden;
+  transition: transform 0.25s;
+}
+.menu-card:hover {
+  transform: translateY(-4px);
+}
+.card-img {
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3.8rem;
+}
+.card-body {
+  padding: 18px 20px 20px;
+}
+.card-body h3 {
+  font-size: 1rem;
+  color: #2d2015;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+.desc {
+  font-size: 12.5px;
+  color: #8b7355;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.price {
+  font-weight: 700;
+  color: #2d2015;
+  font-size: 1.1rem;
+}
+.category-tag {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #b08c5a;
+  background: #faf3e8;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+footer {
+  background: #2d2015;
+  color: #c4b49e;
+  padding: 56px 24px 28px;
+}
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 32px;
+  max-width: 960px;
+  margin: 0 auto 36px;
+}
+.footer-grid strong {
+  color: #f5ede0;
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+.footer-grid p {
+  font-size: 13px;
+  margin: 3px 0;
+  line-height: 1.6;
+}
+.footer-tagline {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  color: #f5ede0;
+  margin-bottom: 4px;
+}
+.copyright {
+  text-align: center;
+  font-size: 11px;
+  color: #6b5d4e;
+  border-top: 1px solid #4a3829;
+  padding-top: 20px;
+  max-width: 960px;
+  margin: 0 auto;
+}`;
+
+const MENU_ITEMS = [
+  { emoji:'🍞', name:'Sourdough Loaf',    desc:'72-hour fermented, crispy crust',     price:'6.50', cat:'bread',   bg:'linear-gradient(135deg,#f5e6d3,#e8d5bc)' },
+  { emoji:'🥖', name:'Rustic Baguette',   desc:'Classic French style, golden brown',  price:'4.00', cat:'bread',   bg:'linear-gradient(135deg,#f0dfc8,#e5cfaf)' },
+  { emoji:'🌾', name:'Whole Wheat Boule', desc:'Hearty, nutty, wholesome',            price:'5.50', cat:'bread',   bg:'linear-gradient(135deg,#e8dcc8,#d9c9aa)' },
+  { emoji:'🥐', name:'Chocolate Croissant',desc:'Buttery layers, dark chocolate',     price:'4.50', cat:'pastry',  bg:'linear-gradient(135deg,#e6d5c3,#d4bfa8)' },
+  { emoji:'🍩', name:'Almond Danish',     desc:'Flaky pastry, almond cream filling',  price:'5.00', cat:'pastry',  bg:'linear-gradient(135deg,#f2e4d0,#e8d4b8)' },
+  { emoji:'🧁', name:'Cinnamon Roll',     desc:'Warm, gooey, cream cheese glaze',     price:'4.00', cat:'pastry',  bg:'linear-gradient(135deg,#ecdcc8,#dfcaad)' },
+  { emoji:'🥕', name:'Carrot Cake',       desc:'Spiced sponge, cream cheese frosting',price:'7.00', cat:'cake',    bg:'linear-gradient(135deg,#f0dcc4,#e2c9a6)' },
+  { emoji:'🍋', name:'Lemon Tart',        desc:'Tangy curd, buttery shortcrust',      price:'6.50', cat:'cake',    bg:'linear-gradient(135deg,#f5ead3,#ebe0c0)' },
+  { emoji:'☕', name:'Tiramisu',           desc:'Espresso-soaked, mascarpone layers',  price:'8.00', cat:'cake',    bg:'linear-gradient(135deg,#e0d0be,#d2bea5)' },
+];
+
+function makeCardHTML(item, withButton) {
+  const btnHTML = withButton ? `
+          <button class="add-btn" onclick="parent.addToCart('${item.name}',${item.price})">+ Add to Order</button>` : '';
+  return `<div class="menu-card"${withButton?' data-cat="'+item.cat+'"':''}>
+        <div class="card-img" style="background:${item.bg}"><span>${item.emoji}</span></div>
+        <div class="card-body">
+          <h3>${item.name}</h3>
+          <p class="desc">${item.desc}</p>
+          <div class="card-footer">
+            <span class="price">$${item.price}</span>
+            <span class="category-tag">${item.cat}</span>
+          </div>${btnHTML}
+        </div>
+      </div>`;
+}
+
+function makePageHTML(withJS) {
+  const cards = MENU_ITEMS.map(i => makeCardHTML(i, withJS)).join('\n      ');
+  const navExtra = withJS ? `
+      <button class="cart-btn" onclick="parent.toggleCart()">🛒 <span class="cart-badge" id="cart-badge">0</span></button>` : '';
+  const scriptTag = withJS ? `
+  <script>
+    // Expose functions to parent window for iframe access
+    window.parent.renderCart = window.parent.renderCart || function() {};
+  <\/script>` : '';
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sweet Crumbs Bakery</title>
+</head>
+<body>
+
+  <nav>
+    <a href="#" class="logo">Sweet Crumbs</a>
+    <div class="nav-links">
+      <a href="#menu">Menu</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>${navExtra}
+    </div>
+  </nav>
+
+  <section class="hero">
+    <p class="hero-tag">Bakery &amp; Patisserie</p>
+    <h1>Fresh from our oven<br>to your table.</h1>
+    <p class="hero-sub">Artisan breads, pastries, and cakes — baked with love in Warsaw since 2019.</p>
+    <a href="#menu" class="hero-btn">View Our Menu</a>
+  </section>
+
+  <section id="menu" class="section">
+    <h2>Our Menu</h2>
+    <p class="section-sub">Everything baked fresh daily in small batches</p>
+    <div class="menu-grid" id="menu-grid">
+      ${cards}
+    </div>
+  </section>
+
+  <footer id="contact">
+    <div class="footer-grid">
+      <div>
+        <p class="footer-tagline">Sweet Crumbs Bakery</p>
+        <p>Baked with love in the heart of Warsaw.</p>
+      </div>
+      <div>
+        <strong>Hours</strong>
+        <p>Mon – Sat: 7 AM – 6 PM</p>
+        <p>Sunday: 8 AM – 2 PM</p>
+      </div>
+      <div>
+        <strong>Contact</strong>
+        <p>12 High Street, Warsaw</p>
+        <p>+48 123 456 789</p>
+        <p>hello@sweetcrumbs.pl</p>
+      </div>
+    </div>
+    <p class="copyright">© 2025 Sweet Crumbs Bakery. All rights reserved.</p>
+  </footer>${scriptTag}
+
+</body>
+</html>`;
+}
+
+const JS_EXTRA_CSS = `
+.cart-btn {
+  background: #2d2015; color: white; border: none;
+  border-radius: 8px; padding: 8px 16px;
+  font-size: 14px; cursor: pointer;
+  transition: opacity 0.2s; position: relative;
+}
+.cart-btn:hover { opacity: 0.85; }
+.cart-badge {
+  background: #c0392b; color: white;
+  border-radius: 50%; font-size: 11px;
+  font-weight: 700; min-width: 18px; height: 18px;
+  display: inline-flex; align-items: center;
+  justify-content: center; margin-left: 4px;
+}
+
+.add-btn {
+  display: block; width: 100%; padding: 10px;
+  margin-top: 14px;
+  background: #faf3e8; border: 1px solid #e8dfd3;
+  border-radius: 8px; font-size: 13px;
+  font-weight: 600; color: #2d2015;
+  cursor: pointer; transition: all 0.2s;
+  font-family: inherit;
+}
+.add-btn:hover {
+  background: #2d2015; color: white;
+  border-color: #2d2015;
+  transform: translateY(-1px);
+}`;
+
+/* ==============================================================
+   FILE CONTENTS — SEPARATE FILES PER LAYER
+   ============================================================== */
+const FILES = {
+  text: { 'content.txt': `SWEET CRUMBS BAKERY
+====================
+
+Navigation: Home | Menu | About | Contact
+
+---
+
+HERO SECTION
+Fresh from our oven to your table.
+Artisan breads, pastries, and cakes — baked with love in Warsaw since 2019.
+[View Our Menu button]
+
+---
+
+OUR MENU — Everything baked fresh daily
+
+Bread:
+- Sourdough Loaf ............ $6.50
+  72-hour fermented, crispy crust
+- Rustic Baguette ........... $4.00
+  Classic French style, golden brown
+- Whole Wheat Boule ......... $5.50
+  Hearty, nutty, wholesome
+
+Pastries:
+- Chocolate Croissant ....... $4.50
+  Buttery layers, dark chocolate
+- Almond Danish ............. $5.00
+  Flaky pastry, almond cream filling
+- Cinnamon Roll ............. $4.00
+  Warm, gooey, cream cheese glaze
+
+Cakes:
+- Carrot Cake (slice) ....... $7.00
+  Spiced sponge, cream cheese frosting
+- Lemon Tart ................ $6.50
+  Tangy curd, buttery shortcrust
+- Tiramisu .................. $8.00
+  Espresso-soaked, mascarpone layers
+
+---
+
+FOOTER
+Sweet Crumbs Bakery
+12 High Street, Warsaw
+Mon-Sat: 7 AM – 6 PM | Sun: 8 AM – 2 PM
++48 123 456 789 | hello@sweetcrumbs.pl
+© 2025 Sweet Crumbs Bakery` }
+};
+
+FILES.html = { 'index.html': makePageHTML(false) };
+FILES.css = {
+  'index.html': makePageHTML(false),
+  'style.css': BAKERY_CSS
+};
+FILES.js = {
+  'index.html': makePageHTML(true),
+  'style.css': BAKERY_CSS + JS_EXTRA_CSS,
+  'script.js': `/* ===== script.js =====
+   Shopping cart functionality
+   ========================= */
+
+// Cart is managed in parent window (main page)
+// so it persists when iframe reloads`
+};
+
+/* ==============================================================
+   HELPERS
+   ============================================================== */
+function escapeHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function activeLayer(){if(state.layers.js)return'js';if(state.layers.css)return'css';if(state.layers.html)return'html';return'text';}
+
+const tabsEl=document.getElementById('file-tabs');
+const editorEl=document.getElementById('code-editor');
+const previewEl=document.getElementById('live-preview');
+const langLabel=document.getElementById('editor-lang-label');
+const DOT_COLORS={'content.txt':'var(--color-text)','index.html':'var(--color-html)','style.css':'var(--color-css)','script.js':'var(--color-js)'};
+const EXT_LABELS={'content.txt':'TXT','index.html':'HTML','style.css':'CSS','script.js':'JS'};
+
+function rebuildFileTabs(){
+    const layer=activeLayer();const files=FILES[layer];const names=Object.keys(files);
+    tabsEl.innerHTML='';
+    names.forEach(name=>{const b=document.createElement('button');b.className='file-tab'+(name===state.activeTab?' active':'');b.innerHTML=`<span class="tab-dot" style="background:${DOT_COLORS[name]||'var(--text-body)'}"></span>${name}`;b.onclick=()=>selectTab(name);tabsEl.appendChild(b);});
+    if(!files[state.activeTab])state.activeTab=names[0];
+    tabsEl.querySelectorAll('.file-tab').forEach(t=>t.classList.toggle('active',t.textContent.trim()===state.activeTab));
+    syncEditor();
+}
+function selectTab(name){FILES[activeLayer()][state.activeTab]=editorEl.value;state.activeTab=name;tabsEl.querySelectorAll('.file-tab').forEach(t=>t.classList.toggle('active',t.textContent.trim()===name));syncEditor();}
+function syncEditor(){const files=FILES[activeLayer()];editorEl.value=files[state.activeTab]||'';langLabel.textContent=EXT_LABELS[state.activeTab]||'';}
+
+function renderPreview(){
+    const layer=activeLayer();const files=FILES[layer];
+    const doc=previewEl.contentDocument||previewEl.contentWindow.document;
+    
+    // Text layer - just plain text
+    if(layer==='text'){
+        doc.open();
+        doc.write(`<!DOCTYPE html><html><head><style>body{font-family:'Courier New',monospace;font-size:13px;padding:20px;white-space:pre-wrap;color:#4a3f35;background:#fffcf8;margin:0;line-height:1.7;}</style></head><body>${escapeHtml(files['content.txt']||'')}</body></html>`);
+        doc.close();
+        return;
+    }
+    
+    // HTML layer - just structure, no styling
+    if(layer==='html'){
+        doc.open();
+        doc.write(files['index.html']||'');
+        doc.close();
+        return;
+    }
+    
+    // CSS layer - inject CSS into HTML
+    if(layer==='css'){
+        let html = files['index.html']||'';
+        const css = files['style.css']||'';
+        // Inject CSS into head
+        html = html.replace('</head>', `<style>\n${css}\n</style>\n</head>`);
+        doc.open();
+        doc.write(html);
+        doc.close();
+        return;
+    }
+    
+    // JS layer - inject both CSS and JS
+    if(layer==='js'){
+        let html = files['index.html']||'';
+        const css = files['style.css']||'';
+        // Inject CSS into head
+        html = html.replace('</head>', `<style>\n${css}\n</style>\n</head>`);
+        doc.open();
+        doc.write(html);
+        doc.close();
+        // Update cart display after iframe loads
+        setTimeout(renderCart, 100);
+        return;
+    }
+}
+
+function toggleLayer(name){
+    const order=['text','html','css','js'];const idx=order.indexOf(name);
+    if(state.layers[name]&&activeLayer()===name&&idx>0)state.layers[name]=false;
+    else order.forEach((l,i)=>{state.layers[l]=i<=idx;});
+    state.activeTab=Object.keys(FILES[activeLayer()])[0];
+    updateUI();
+}
+function updateUI(){
+    const order=['text','html','css','js'];
+    document.querySelectorAll('.layer-btn').forEach(b=>b.classList.toggle('active',state.layers[b.dataset.layer]));
+    order.forEach(l=>{document.getElementById('sd-'+l).classList.toggle('on',state.layers[l]);document.getElementById('step-'+l).classList.toggle('done',state.layers[l]);});
+    rebuildFileTabs();renderPreview();
+}
+editorEl.addEventListener('input',function(){FILES[activeLayer()][state.activeTab]=editorEl.value;renderPreview();});
+
+/* ==============================================================
+   SHOPPING CART (Parent window - persists across iframe reloads)
+   ============================================================== */
+let cart = [];
+
+function addToCart(name, price) {
+  cart.push({ name: name, price: price });
+  renderCart();
+  showToast(name + ' added! 🛒');
+}
+
+function removeFromCart(index) {
+  cart.splice(index, 1);
+  renderCart();
+}
+
+function renderCart() {
+  const iframe = document.getElementById('live-preview');
+  const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+  const badge = iframeDoc.getElementById('cart-badge');
+  
+  if (badge) {
+    badge.textContent = cart.length;
+  }
+  
+  // Update cart panel if it exists
+  updateCartPanel();
+}
+
+function updateCartPanel() {
+  // Create cart panel if it doesn't exist
+  let panel = document.getElementById('main-cart-panel');
+  let overlay = document.getElementById('main-cart-overlay');
+  
+  if (!panel) {
+    // Create overlay
+    overlay = document.createElement('div');
+    overlay.id = 'main-cart-overlay';
+    overlay.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:99;';
+    overlay.onclick = toggleCart;
+    document.body.appendChild(overlay);
+    
+    // Create panel
+    panel = document.createElement('div');
+    panel.id = 'main-cart-panel';
+    panel.style.cssText = 'position:fixed;top:0;right:-360px;width:340px;height:100%;background:white;z-index:100;display:flex;flex-direction:column;box-shadow:-8px 0 32px rgba(0,0,0,0.12);transition:right 0.3s ease;';
+    panel.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid #f0ebe4;">
+        <strong>🛒 Your Order</strong>
+        <button onclick="toggleCart()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#8b7355;line-height:1;">✕</button>
+      </div>
+      <div id="main-cart-items" style="flex:1;overflow-y:auto;padding:16px 24px;"></div>
+      <div style="padding:20px 24px;border-top:1px solid #f0ebe4;">
+        <div style="display:flex;justify-content:space-between;font-size:1.1rem;margin-bottom:14px;color:#2d2015;">
+          <span>Total:</span>
+          <strong id="main-cart-total">$0.00</strong>
+        </div>
+        <button onclick="placeOrder()" style="width:100%;padding:15px 36px;background:#2d2015;color:white;border:none;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;font-family:inherit;">Place Order</button>
+      </div>
+    `;
+    document.body.appendChild(panel);
+  }
+  
+  const itemsEl = document.getElementById('main-cart-items');
+  const totalEl = document.getElementById('main-cart-total');
+  
+  if (cart.length === 0) {
+    itemsEl.innerHTML = '<p style="color:#8b7355;text-align:center;padding:40px 0;">Your cart is empty</p>';
+    totalEl.textContent = '$0.00';
+    return;
+  }
+  
+  let html = '';
+  let sum = 0;
+  cart.forEach(function(item, i) {
+    sum += item.price;
+    html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #f0ebe4;font-size:14px;">
+      <span style="color:#2d2015;font-weight:500;">${item.name}</span>
+      <span>
+        <span style="color:#b08c5a;font-weight:600;">$${item.price.toFixed(2)}</span>
+        <button onclick="removeFromCart(${i})" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:14px;margin-left:10px;opacity:0.6;transition:opacity 0.2s;">✕</button>
+      </span>
+    </div>`;
+  });
+  itemsEl.innerHTML = html;
+  totalEl.textContent = '$' + sum.toFixed(2);
+}
+
+function toggleCart() {
+  const panel = document.getElementById('main-cart-panel');
+  const overlay = document.getElementById('main-cart-overlay');
+  if (panel && overlay) {
+    const isOpen = panel.style.right === '0px';
+    panel.style.right = isOpen ? '-360px' : '0px';
+    overlay.style.display = isOpen ? 'none' : 'block';
+  }
+}
+
+function placeOrder() {
+  if (cart.length === 0) return;
+  const n = cart.length;
+  const sum = cart.reduce((a, b) => a + b.price, 0);
+  showToast('Order placed! ' + n + ' items, $' + sum.toFixed(2) + ' total 🎉');
+  cart = [];
+  renderCart();
+  toggleCart();
+}
+
+function showToast(msg) {
+  const old = document.querySelector('.main-toast');
+  if (old) old.remove();
+  const t = document.createElement('div');
+  t.className = 'main-toast';
+  t.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:#2d2015;color:white;padding:14px 28px;border-radius:12px;font-size:14px;font-weight:500;opacity:0;transition:all 0.3s ease;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,0.2);';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)'; }, 10);
+  setTimeout(() => {
+    t.style.opacity = '0';
+    t.style.transform = 'translateX(-50%) translateY(80px)';
+    setTimeout(() => t.remove(), 300);
+  }, 2200);
+}
+
+updateUI();
+</script>
 </body>
 </html>
