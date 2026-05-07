@@ -42,10 +42,10 @@
   letter-spacing: 0.14em;
   gap: 16px;
 }
-#controls .bar-label { opacity: 0.55; }
+#controls .bar-label { opacity: 0.55; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #controls .bar-label em { color: var(--accent); font-style: normal; opacity: 1; }
-#controls .bar-right { display: flex; align-items: center; gap: 16px; }
-#controls .bar-hint { opacity: 0.4; font-size: 10px; }
+#controls .bar-right { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+#controls .bar-hint { display: none; }
 
 .save-btn {
   background: var(--accent);
