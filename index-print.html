@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<title>AI w organizacji · Quantica Labs — Wersja do druku</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Newsreader:ital,wght@0,300;0,400;0,500;0,600;1,400;1,600&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+
+/* ============================================================
+   TOKENS
+   ============================================================ */
+:root {
+  --paper:   #f4ede1;
+  --paper-2: #ece3d3;
+  --ink:     #1a1410;
+  --ink-2:   #463a30;
+  --ink-3:   #7a6a5a;
+  --accent:  #c4502c;
+  --rule:    rgba(26,20,16,.13);
+}
+
+/* ============================================================
+   SCREEN CHROME: control bar + page preview
+   ============================================================ */
+#controls {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 52px;
+  background: var(--ink);
+  color: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  z-index: 9999;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  gap: 16px;
+}
+#controls .bar-label { opacity: 0.55; }
+#controls .bar-label em { color: var(--accent); font-style: normal; opacity: 1; }
+#controls .bar-right { display: flex; align-items: center; gap: 16px; }
+#controls .bar-hint { opacity: 0.4; font-size: 10px; }
+
+.save-btn {
+  background: var(--accent);
+  color: var(--paper);
+  border: none;
+  padding: 9px 22px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: opacity .15s;
+  white-space: nowrap;
+}
+.save-btn:hover { opacity: 0.82; }
+
+/* Paged.js wraps everything in .pagedjs_pages */
+@media screen {
+  body { background: #cfc8bc; }
+
+  .pagedjs_pages {
+    padding: 52px 40px 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+  }
+
+  .pagedjs_page {
+    box-shadow: 0 6px 32px rgba(0,0,0,.22), 0 1px 4px rgba(0,0,0,.12);
+  }
+
+  /* dark page boxes */
+  .pagedjs_named_page.pagedjs_cover_page .pagedjs_page,
+  .pagedjs_named_page.pagedjs_closing_page .pagedjs_page {
+    background: var(--ink);
+  }
+}
+
+/* ============================================================
+   PAGED MEDIA — PAGE SETUP
+   ============================================================ */
+
+/* Default page */
+@page {
+  size: A4;
+  /* margin: 0 removes the space Chrome uses for URL/date/page-number decorations */
+  margin: 0;
+
+  @top-left {
+    content: "Quantica Labs";
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 7.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--ink-3);
+    border-bottom: 0.5pt solid var(--ink);
+    padding: 8mm 0 4mm 22mm;
+    vertical-align: bottom;
+    width: 50%;
+  }
+
+  @top-right {
+    content: string(chapterName);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 7.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-3);
+    border-bottom: 0.5pt solid var(--ink);
+    padding: 8mm 18mm 4mm 0;
+    vertical-align: bottom;
+    text-align: right;
+    width: 50%;
+  }
+
+  @bottom-center {
+    content: counter(page);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9pt;
+    color: var(--ink-3);
+    padding-top: 5mm;
+    vertical-align: top;
+  }
+}
+
+/* Cover — no header/footer, no margins, full bleed */
+@page cover {
+  margin: 0;
+  background: var(--ink);
+  @top-left   { content: none; border: none; }
+  @top-right  { content: none; border: none; }
+  @bottom-center { content: none; }
+}
+
+/* TOC + intro — suppress running header on these opening pages */
+@page front-matter {
+  @top-left  { content: none; border: none; }
+  @top-right { content: none; border: none; }
+}
+
+/* Closing/CTA — dark, no header/footer */
+@page closing {
+  margin: 0;
+  background: var(--ink);
+  @top-left   { content: none; border: none; }
+  @top-right  { content: none; border: none; }
+  @bottom-center { content: none; }
+}
+
+/* ============================================================
+   BASE TYPOGRAPHY
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 11pt;
+  line-height: 1.65;
+  color: var(--ink);
+  background: var(--paper);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* h2 content feeds the running header */
+h2 { string-set: chapterName content(); }
+
+/* ============================================================
+   COVER PAGE
+   ============================================================ */
+.cover-page {
+  page: cover;
+  break-after: page;
+  background: var(--ink);
+  color: var(--paper);
+  width: 210mm;
+  height: 297mm;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding: 22mm;
+}
+
+.cover-brand {
+  font-family: 'Newsreader', serif;
+  font-style: italic;
+  font-size: 16pt;
+  color: var(--paper-2);
+  letter-spacing: -0.01em;
+}
+.cover-brand strong { font-style: normal; font-weight: 700; color: var(--paper); }
+
+.cover-main { display: flex; flex-direction: column; justify-content: center; }
+
+.cover-kicker {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8pt;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  color: var(--accent);
+  margin-bottom: 10mm;
+  display: flex;
+  align-items: center;
+  gap: 6mm;
+}
+.cover-kicker::before {
+  content: '';
+  display: inline-block;
+  width: 14mm;
+  height: 0.6pt;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+.cover-title {
+  font-family: 'Newsreader', serif;
+  font-weight: 400;
+  font-size: 38pt;
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+  color: var(--paper);
+  margin-bottom: 6mm;
+}
+.cover-title em { font-style: italic; color: var(--accent); }
+
+.cover-desc {
+  font-family: 'Source Serif 4', serif;
+  font-size: 11pt;
+  color: var(--paper-2);
+  opacity: 0.7;
+  line-height: 1.55;
+  max-width: 120mm;
+  margin-bottom: 14mm;
+}
+
+.cover-rule {
+  width: 100%;
+  height: 0.5pt;
+  background: rgba(244,237,225,0.18);
+  margin: 0 0 6mm;
+}
+
+.cover-foot {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7.5pt;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--ink-3);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+/* ============================================================
+   TOC PAGE
+   ============================================================ */
+.toc-page {
+  page: front-matter;
+  break-after: page;
+  padding: 24mm 22mm 22mm;
+}
+
+.toc-section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7.5pt;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--accent);
+  margin-bottom: 8mm;
+  display: flex;
+  align-items: center;
+  gap: 5mm;
+}
+.toc-section-label::before {
+  content: '';
+  display: inline-block;
+  width: 10mm;
+  height: 0.5pt;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+.toc-heading {
+  font-family: 'Newsreader', serif;
+  font-size: 28pt;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: var(--ink);
+  margin-bottom: 10mm;
+}
+
+.toc-items {
+  list-style: none;
+  border-top: 0.7pt solid var(--ink);
+}
+
+.toc-items li {
+  display: flex;
+  align-items: baseline;
+  padding: 3.8mm 0;
+  border-bottom: 0.5pt solid var(--rule);
+}
+
+.toc-items li a {
+  color: var(--ink);
+  text-decoration: none;
+  flex: 1;
+  font-family: 'Source Serif 4', serif;
+  font-size: 11pt;
+}
+
+.toc-n {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7.5pt;
+  font-weight: 500;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  min-width: 9mm;
+  padding-top: 1pt;
+  flex-shrink: 0;
+}
+
+.toc-pg {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8.5pt;
+  color: var(--ink-3);
+  min-width: 8mm;
+  text-align: right;
+  flex-shrink: 0;
+}
+/* auto page numbers via Paged.js target-counter */
+.toc-pg::after { content: target-counter(attr(href), page); }
+
+.toc-dots {
+  flex: 0 1 auto;
+  border-bottom: 0.5pt dotted var(--ink-3);
+  margin: 0 3mm 2pt;
+  align-self: flex-end;
+  min-width: 8mm;
+}
+
+/* ============================================================
+   INTRO SECTION (00)
+   ============================================================ */
+.intro-section {
+  page: front-matter;
+  break-after: page;
+  padding: 18mm 22mm 22mm;
+}
+
+/* ============================================================
+   CHAPTERS
+   ============================================================ */
+.chapter {
+  break-before: page;
+  padding: 20mm 22mm 22mm;
+}
+
+.chapter-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 6mm;
+  padding-bottom: 7mm;
+  margin-bottom: 7mm;
+  border-bottom: 0.7pt solid var(--ink);
+}
+
+.ch-badge {
+  flex-shrink: 0;
+}
+
+.ch-num {
+  font-family: 'Newsreader', serif;
+  font-size: 42pt;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--accent);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  display: block;
+}
+
+.ch-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7pt;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--ink-3);
+  margin-bottom: 2mm;
+  margin-top: 2mm;
+}
+
+h2 {
+  font-family: 'Newsreader', serif;
+  font-weight: 500;
+  font-size: 21pt;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--ink);
+}
+h2 em { font-style: italic; font-weight: 400; color: var(--accent); }
+
+.chapter-body p {
+  margin-bottom: 0.8em;
+  orphans: 3;
+  widows: 3;
+}
+
+/* drop cap on first paragraph of chapter body */
+.chapter-body > p:first-of-type { display: flow-root; }
+.chapter-body > p:first-of-type::first-letter {
+  font-family: 'Newsreader', serif;
+  font-weight: 600;
+  float: left;
+  font-size: 4.2em;
+  line-height: 0.86;
+  padding: 4pt 7pt 0 0;
+  color: var(--accent);
+}
+.no-dropcap > p:first-of-type::first-letter { all: unset; }
+
+/* pull quote */
+blockquote.pull {
+  margin: 6mm 0;
+  padding: 4.5mm 7mm;
+  border-top: 0.5pt solid var(--ink);
+  border-bottom: 0.5pt solid var(--ink);
+  font-family: 'Newsreader', serif;
+  font-style: italic;
+  font-size: 13.5pt;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  position: relative;
+  break-inside: avoid;
+}
+blockquote.pull::before {
+  content: '\201C';
+  position: absolute;
+  top: -5pt; left: -4pt;
+  font-size: 44pt;
+  color: var(--accent);
+  font-family: 'Newsreader', serif;
+  line-height: 1;
+}
+
+/* contrast / two-column box */
+.contrast {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 0.7pt solid var(--ink);
+  border-bottom: 0.7pt solid var(--ink);
+  margin: 5mm 0;
+  break-inside: avoid;
+}
+.contrast > div { padding: 4.5mm 5.5mm; font-size: 10pt; line-height: 1.55; }
+.contrast > div + div { border-left: 0.5pt solid var(--rule); }
+.contrast h4 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7pt;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  margin-bottom: 2.5mm;
+  color: var(--accent);
+  font-weight: 500;
+}
+.contrast p { margin: 0; }
+
+/* intro section heading style */
+.intro-kicker {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7.5pt;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--accent);
+  margin-bottom: 7mm;
+  display: flex;
+  align-items: center;
+  gap: 5mm;
+}
+.intro-kicker::before {
+  content: '';
+  display: inline-block;
+  width: 10mm;
+  height: 0.5pt;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+.intro-section h2 {
+  font-size: 26pt;
+  margin-bottom: 7mm;
+  padding-bottom: 6mm;
+  border-bottom: 0.7pt solid var(--ink);
+}
+
+/* ============================================================
+   CLOSING / CTA PAGE
+   ============================================================ */
+.closing-page {
+  page: closing;
+  break-before: page;
+  background: var(--ink);
+  color: var(--paper);
+  width: 210mm;
+  height: 297mm;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding: 22mm;
+}
+
+.closing-brand {
+  font-family: 'Newsreader', serif;
+  font-style: italic;
+  font-size: 16pt;
+  color: var(--paper-2);
+}
+.closing-brand strong { font-style: normal; font-weight: 700; color: var(--paper); }
+
+.closing-main { display: flex; flex-direction: column; justify-content: center; }
+
+.closing-kicker {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8pt;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--accent);
+  margin-bottom: 9mm;
+  display: flex;
+  align-items: center;
+  gap: 6mm;
+}
+.closing-kicker::before {
+  content: '';
+  display: inline-block;
+  width: 14mm;
+  height: 0.6pt;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+.closing-title {
+  font-family: 'Newsreader', serif;
+  font-weight: 400;
+  font-size: 34pt;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  color: var(--paper);
+  margin-bottom: 8mm;
+}
+.closing-title em { font-style: italic; color: var(--accent); }
+
+.closing-body {
+  font-size: 11pt;
+  color: var(--paper-2);
+  line-height: 1.62;
+  max-width: 115mm;
+}
+.closing-body p { margin-bottom: 0.75em; }
+
+.closing-foot {
+  border-top: 0.5pt solid rgba(244,237,225,.18);
+  padding-top: 6mm;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.closing-foot-brand {
+  font-family: 'Newsreader', serif;
+  font-style: italic;
+  font-size: 20pt;
+  color: var(--paper);
+}
+.closing-foot-brand strong { font-style: normal; font-weight: 700; }
+
+.closing-foot-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7.5pt;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-3);
+  text-align: right;
+  line-height: 1.7;
+}
+
+/* ============================================================
+   PRINT: hide control bar
+   ============================================================ */
+@media print {
+  #controls { display: none !important; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- ============ CONTROL BAR (screen only) ============ -->
+<div id="controls">
+  <span class="bar-label"><em>Quantica Labs</em> — Podgląd druku · AI w organizacji</span>
+  <div class="bar-right">
+    <span class="bar-hint">Ctrl+P → Zapisz jako PDF</span>
+    <button class="save-btn" onclick="window.print()">↓ Zapisz jako PDF</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     COVER PAGE
+     ============================================================ -->
+<div class="cover-page">
+
+  <div class="cover-brand"><strong>Quantica</strong> Labs</div>
+
+  <div class="cover-main">
+    <div class="cover-kicker">Praktyka AI · Poradnik wdrożeniowy · Maj 2026</div>
+    <h1 class="cover-title">
+      AI w&nbsp;organizacji:<br>
+      od&nbsp;pomysłu do<br>
+      <em>realnego wdrożenia</em><br>
+      w&nbsp;11&nbsp;krokach
+    </h1>
+    <p class="cover-desc">Systematyczne podejście do wdrożeń AI — od identyfikacji potrzeb, przez przygotowanie danych, aż po uruchomienie systemu, który realnie wspiera codzienną pracę.</p>
+  </div>
+
+  <div>
+    <div class="cover-rule"></div>
+    <div class="cover-foot">
+      <span>Quantica Lab</span>
+      <span>Maj 2026</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================
+     TOC PAGE
+     ============================================================ -->
+<div class="toc-page">
+
+  <div class="toc-section-label">Spis treści</div>
+  <h2 class="toc-heading">AI w&nbsp;organizacji<br>w&nbsp;11&nbsp;krokach</h2>
+
+  <ol class="toc-items">
+    <li>
+      <span class="toc-n">00</span>
+      <a href="#intro">Wprowadzenie — Od pomysłu do wdrożenia</a>
+      <span class="toc-dots"></span>
+      <span class="toc-pg"></span>
+    </li>
+    <li>
+      <span class="toc-n">01</span>
+      <a href="#ch01">Identyfikacja obszarów wdrożenia</a>
+      <span class="toc-dots"></span>
+      <span class="toc-pg"></span>
+    </li>
+    <li>
+      <span class="toc-n">02</span>
+      <a href="#ch02">Opracowanie scenariuszy użycia</a>
+      <span class="toc-dots"></span>
+      <span class="toc-pg"></span>
+    </li>
+    <li>
+      <span class="toc-n">03</span>
+      <a href="#ch03">Ocena gotowości organizacji do wdrożenia AI</a>
+      <span class="toc-dots"></span>
+      <span class="toc-pg"></span>
+    </li>
+    <li>
+      <span class="toc-n">04</span>
+      <a href="#ch04">Benchmark i wybór rozwiązania</a>
+      <span class="toc-dots"></span>
+      <span class="toc-pg"></span>
+    </li>
+    <li>
+      <span class="toc-n">05</span>
+      <a href="#ch05">Zdefiniowanie zakresu i planu wdrożenia</a>
+      <span class="toc-dots"></span>
+      <span class="toc-pg"></span>
+    </li>
+    <li>
+      <span class="toc-n">06</span>
+      <a href="#ch06">Przygotowanie i uporządkowanie danych</a>
+      <span class="toc-dots"></span>
+      <span class="toc-pg"></span>
+    </li>
+    <li>
+      <span class="toc-n">07</span>
+      <a href="#ch07">Wybór infrastruktury i architektury rozwiązania</a>
+      <span class="toc-dots"></span>
+      <span class="toc-pg"></span>
+    </li>
+    <li>
+      <span class="toc-n">08</span>
+      <a href="#ch08">Budowa bazy wiedzy i konfiguracja systemu</a>
+      <span class="toc-dots"></span>
+      <span class="toc-pg"></span>
+    </li>
+    <li>
+      <span class="toc-n">09</span>
+      <a href="#ch09">Testy użytkowe</a>
+      <span class="toc-dots"></span>
+      <span class="toc-pg"></span>
+    </li>
+    <li>
+      <span class="toc-n">10</span>
+      <a href="#ch10">Wdrożenie produkcyjne</a>
+      <span class="toc-dots"></span>
+      <span class="toc-pg"></span>
+    </li>
+    <li>
+      <span class="toc-n">11</span>
+      <a href="#ch11">Szkolenie użytkowników</a>
+      <span class="toc-dots"></span>
+      <span class="toc-pg"></span>
+    </li>
+  </ol>
+
+</div>
+
+<!-- ============================================================
+     INTRO (00)
+     ============================================================ -->
+<div class="intro-section" id="intro">
+
+  <div class="intro-kicker">Wprowadzenie</div>
+  <h2>Od pomysłu do wdrożenia</h2>
+
+  <div class="chapter-body no-dropcap">
+    <p>Większość organizacji nie zastanawia się już dziś, czy wdrażać AI, ale jak zrobić to w sposób, który przynosi realną wartość. Problem w tym, że wiele projektów kończy się na etapie pilotaży, które nie rozwiązują konkretnych problemów biznesowych. Wyzwaniem najczęściej nie jest sama technologia, ale brak uporządkowanej wiedzy i procesów, trudność w bezpiecznym wykorzystaniu danych oraz konieczność dostosowania się do zmieniających się wymogów regulacyjnych.</p>
+    <p>W Quantica Lab do wdrożeń AI podchodzimy w sposób systematyczny. Zaczynamy nie od wyboru modelu czy narzędzia, ale od zrozumienia procesów i problemów, które rzeczywiście warto usprawnić, oraz oceny gotowości organizacji. Dopiero na tej podstawie projektujemy rozwiązania dopasowane do organizacji, jej procesów i danych.</p>
+    <p>W artykule pokazujemy, jak wygląda taki proces krok po kroku: od identyfikacji potrzeb, przez przygotowanie danych, aż po uruchomienie systemu AI, który realnie wspiera codzienną pracę. Kolejne etapy omówimy na przykładzie systemu RAG (Retrieval-Augmented Generation), w którym odpowiedzi generowane są na podstawie dokumentów organizacji, takich jak regulaminy, procedury czy dokumentacja wewnętrzna.</p>
+
+    <blockquote class="pull">
+      Działa on dwuetapowo: najpierw wyszukuje najbardziej trafne fragmenty dokumentów, a następnie tworzy odpowiedź w oparciu o te źródła.
+    </blockquote>
+
+    <p>Dzięki temu generowane treści są spójne, zgodne ze stanem faktycznym i możliwe do zweryfikowania w źródłach. Rozwiązania tego typu stają się dziś standardem wdrożeń AI w organizacjach, szczególnie tam, gdzie kluczowe znaczenie mają bezpieczeństwo danych, zgodność z regulacjami oraz kontrola nad generowanymi odpowiedziami.</p>
+  </div>
+
+</div>
+
+<!-- ============================================================
+     KROK 01
+     ============================================================ -->
+<div class="chapter" id="ch01">
+  <div class="chapter-header">
+    <div class="ch-badge">
+      <span class="ch-num">01</span>
+    </div>
+    <div>
+      <div class="ch-label">Krok pierwszy</div>
+      <h2>Identyfikacja obszarów wdrożenia</h2>
+    </div>
+  </div>
+  <div class="chapter-body">
+    <p>Pierwszym krokiem we wdrażaniu AI nie jest wybór technologii, lecz zrozumienie potrzeb organizacji. Praca nad projektem powinna się rozpocząć od identyfikacji obszarów, w których technologia może realnie usprawnić pracę, a więc od pytania „jaki problem chcemy rozwiązać?" zamiast „jakie narzędzie wybrać?". AI ma sens tylko wtedy, gdy odpowiada na konkretne potrzeby i przynosi mierzalne korzyści – w przeciwnym razie pozostaje eksperymentem.</p>
+    <p>Punktem wyjścia powinno być zdefiniowanie miejsc, w których pracownicy tracą najwięcej czasu lub napotykają największe trudności. Najczęściej są to procesy związane z wyszukiwaniem informacji, pracą na rozproszonych dokumentach, przygotowywaniem odpowiedzi na powtarzające się pytania czy ręcznym przetwarzaniem danych. AI najlepiej sprawdza się jako wsparcie w zadaniach powtarzalnych, opartych na pracy z tekstem i danymi.</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     KROK 02
+     ============================================================ -->
+<div class="chapter" id="ch02">
+  <div class="chapter-header">
+    <div class="ch-badge">
+      <span class="ch-num">02</span>
+    </div>
+    <div>
+      <div class="ch-label">Krok drugi</div>
+      <h2>Opracowanie scenariuszy użycia</h2>
+    </div>
+  </div>
+  <div class="chapter-body">
+    <p>Kolejnym krokiem jest opracowanie konkretnych scenariuszy użycia AI. Oznacza to przełożenie ogólnych obszarów, takich jak praca z dokumentami czy obsługa zapytań, na konkretne zadania. Dobrze zdefiniowany scenariusz powinien uwzględniać cel biznesowy, typ danych oraz oczekiwany sposób i jakość odpowiedzi. Warto rozpocząć od 2–3 scenariuszy, które można szybko zweryfikować w pilotażu. Takie podejście ogranicza ryzyko, przyspiesza wdrożenie i pozwala lepiej zrozumieć, gdzie AI przynosi największą wartość.</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     KROK 03
+     ============================================================ -->
+<div class="chapter" id="ch03">
+  <div class="chapter-header">
+    <div class="ch-badge">
+      <span class="ch-num">03</span>
+    </div>
+    <div>
+      <div class="ch-label">Krok trzeci</div>
+      <h2>Ocena gotowości organizacji do wdrożenia AI</h2>
+    </div>
+  </div>
+  <div class="chapter-body">
+    <p>Po zdefiniowaniu obszarów wdrożenia warto również ocenić gotowość organizacji, w szczególności w obszarze danych, infrastruktury i kompetencji. Dzięki temu można określić realne możliwości wdrożenia i uniknąć błędnych założeń na dalszych etapach.</p>
+    <p>Dane są jednym z kluczowych zasobów organizacji, ale ich wykorzystanie w projektach AI wymaga odpowiedniego przygotowania. Przez dane rozumiemy przede wszystkim dokumenty tekstowe (np. procedury, regulaminy, dokumentację techniczną czy korespondencję) zapisane w różnych formatach i przechowywane w różnych systemach, a także inne materiały – takie jak nagrania, wideo czy skany – które mogą zostać przekształcone do postaci tekstowej. Często są one rozproszone, mają nieustrukturyzowaną formę i są w różnym stopniu uporządkowane. Skuteczne wdrożenie nie polega wyłącznie na uruchomieniu modelu AI – wymaga także przemyślanego podejścia do jakości, aktualności i struktury danych. Warto więc odpowiedzieć na podstawowe pytania: jakie dane posiadamy, gdzie się znajdują i czy można je bezpiecznie wykorzystać. To właśnie jakość danych w największym stopniu determinuje jakość działania systemów AI.</p>
+    <p>Drugim obszarem jest infrastruktura technologiczna, a więc wykorzystywane systemy, sposób przechowywania danych oraz możliwości integracji nowych rozwiązań z istniejącym środowiskiem IT. Kluczowe jest określenie, czy organizacja dysponuje zapleczem do uruchamiania systemów AI, czy konieczne będzie wykorzystanie infrastruktury zewnętrznej. Warto uwzględnić wymagania obliczeniowe – zaawansowane modele AI wymagają dostępu do wydajnych zasobów, w szczególności akceleratorów GPU. W sektorach regulowanych szczególne znaczenie mają bezpieczeństwo i lokalizacja danych, co często wymusza korzystanie z rozwiązań on-premise.</p>
+    <p>Trzecim obszarem jest przygotowanie organizacyjne, obejmujące kompetencje zespołów, procesy biznesowe oraz sposób podejmowania decyzji. Istotne jest, czy organizacja dysponuje wiedzą niezbędną do wdrażania i wykorzystywania systemów AI, zarówno po stronie technicznej, jak i biznesowej. Coraz większe znaczenie ma przy tym tzw. AI literacy, czyli świadomość możliwości, ograniczeń i ryzyk związanych z wykorzystaniem tej technologii. Równie ważny jest model decyzyjny – wdrożenia AI mają charakter iteracyjny i wymagają jasnych ról, ścieżek decyzyjnych oraz podziału odpowiedzialności. Ich brak prowadzi do rozproszenia inicjatyw i problemów ze skalowaniem.</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     KROK 04
+     ============================================================ -->
+<div class="chapter" id="ch04">
+  <div class="chapter-header">
+    <div class="ch-badge">
+      <span class="ch-num">04</span>
+    </div>
+    <div>
+      <div class="ch-label">Krok czwarty</div>
+      <h2>Benchmark i wybór rozwiązania</h2>
+    </div>
+  </div>
+  <div class="chapter-body">
+    <p>Gdy wiemy już, co chcemy zbudować i znamy nasze uwarunkowania, pojawia się pytanie: które rozwiązanie rzeczywiście zadziała w naszej organizacji? Wybór nie powinien opierać się na popularności modeli AI ani deklaracjach producentów, lecz na ich rzeczywistym działaniu w kontekście własnych danych.</p>
+    <p>Najlepszym sposobem takiej oceny jest przygotowanie benchmarku modeli AI – zestawu zadań i kryteriów, który pozwala porównać ich wyniki w tych samych warunkach. Benchmark bazujący na danych organizacji i odzwierciedlający rzeczywiste zastosowania pozwala szybko i rzetelnie ocenić jakość odpowiedzi, ich zgodność z danymi oraz dostosowanie do potrzeb organizacji. Dzięki temu możliwe jest przejście od deklaracji producentów do mierzalnej oceny i racjonalnej decyzji technologicznej.</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     KROK 05
+     ============================================================ -->
+<div class="chapter" id="ch05">
+  <div class="chapter-header">
+    <div class="ch-badge">
+      <span class="ch-num">05</span>
+    </div>
+    <div>
+      <div class="ch-label">Krok piąty</div>
+      <h2>Zdefiniowanie zakresu i planu wdrożenia</h2>
+    </div>
+  </div>
+  <div class="chapter-body">
+    <p>Po zdefiniowaniu scenariuszy użycia, ocenie gotowości organizacji i wyborze podejścia można przejść do uruchomienia rozwiązania. Wdrożenie systemu AI, takiego jak RAG, nie jest jednorazowym działaniem, ale procesem obejmującym przygotowanie danych, konfigurację, testy i rozwój systemu. Zacząć należy od określenia szczegółowych celów wdrożenia oraz procesów objętych pilotażem. Równie ważne jest wskazanie użytkowników i kontekstu użycia: czy będzie to narzędzie wewnętrzne dla pracowników, czy rozwiązanie wspierające obsługę klientów. Pozwala to dopasować sposób działania systemu oraz zakres wykorzystywanych danych. Na tym etapie warto również określić mierniki sukcesu, takie jak jakość odpowiedzi, czas dostępu do informacji czy satysfakcja użytkowników. W praktyce wdrożenie zwykle rozpoczyna się od wybranych procesów lub grupy użytkowników, co pozwala szybko zweryfikować działanie systemu i ograniczyć ryzyko.</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     KROK 06
+     ============================================================ -->
+<div class="chapter" id="ch06">
+  <div class="chapter-header">
+    <div class="ch-badge">
+      <span class="ch-num">06</span>
+    </div>
+    <div>
+      <div class="ch-label">Krok szósty</div>
+      <h2>Przygotowanie i uporządkowanie danych</h2>
+    </div>
+  </div>
+  <div class="chapter-body">
+    <p>Przygotowanie danych to jeden z najważniejszych, a zarazem najbardziej czasochłonnych etapów wdrożenia. Ich źródłem mogą być istniejące repozytoria dokumentów, materiały przygotowane ręcznie lub dane z systemów wewnętrznych – pod warunkiem odpowiedniego uporządkowania i ujednolicenia.</p>
+    <p>Proces rozpoczyna się od selekcji dokumentów. Do bazy wiedzy powinny trafiać wyłącznie materiały aktualne, kompletne i istotne z punktu widzenia użytkownika. Oznacza to konieczność odrzucenia treści o niskiej wartości, takich jak fragmentaryczne notatki czy nieaktualne prezentacje.</p>
+    <p>Następnie dokumenty przygotowywane są do przetwarzania: konwertowane do jednolitej postaci tekstowej oraz oczyszczane z elementów utrudniających analizę. Warto przy tym pamiętać, że dane nie muszą pierwotnie mieć formy tekstowej. Coraz częściej systemy AI umożliwiają również przetwarzanie materiałów audio, wideo czy skanów dokumentów. W przypadku danych osobowych konieczne jest przygotowanie dokumentów zgodnie z zasadą minimalizacji i obowiązującymi regulacjami.</p>
+    <p>Istotnym etapem jest także podział dokumentów na mniejsze fragmenty, odpowiadające naturalnej strukturze treści. Dzięki temu system może precyzyjniej wyszukiwać informacje i generować trafniejsze odpowiedzi. Najlepsze efekty przynosi podział przygotowany przy udziale organizacji, choć może być on wspierany automatycznie.</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     KROK 07
+     ============================================================ -->
+<div class="chapter" id="ch07">
+  <div class="chapter-header">
+    <div class="ch-badge">
+      <span class="ch-num">07</span>
+    </div>
+    <div>
+      <div class="ch-label">Krok siódmy</div>
+      <h2>Wybór infrastruktury i architektury rozwiązania</h2>
+    </div>
+  </div>
+  <div class="chapter-body">
+    <p>Wybór infrastruktury i architektury rozwiązania AI ma długofalowe konsekwencje dla bezpieczeństwa, kosztów i możliwości rozwoju organizacji. W sektorach regulowanych i infrastrukturze krytycznej, decyzje te muszą uwzględniać nie tylko aspekty technologiczne, ale przede wszystkim wymagania regulacyjne. Kluczowym kryterium jest bezpieczeństwo danych i zgodność z regulacjami, w tym dyrektywą NIS2 oraz przepisami RODO. Oznacza to konieczność pełnej kontroli nad tym, gdzie dane są przechowywane, kto ma do nich dostęp i w jaki sposób są przetwarzane.</p>
+
+    <p>W praktyce organizacje wybierają pomiędzy modelem chmurowym albo on-premise. Model chmurowy zapewnia skalowalność i szybkie wdrożenie, ale wiąże się z przekazaniem danych zewnętrznemu dostawcy. Model on-premise daje pełną kontrolę nad danymi, jednak wymaga własnej infrastruktury i kompetencji technicznych. Alternatywnym rozwiązaniem jest model hybrydowy, który łączy oba podejścia, umożliwiając pozostawienie danych wrażliwych wewnątrz organizacji.</p>
+
+    <div class="contrast">
+      <div>
+        <h4>Model chmurowy</h4>
+        <p>Skalowalność i szybkie wdrożenie, ale dane trafiają do zewnętrznego dostawcy.</p>
+      </div>
+      <div>
+        <h4>Model on-premise</h4>
+        <p>Pełna kontrola nad danymi — wymaga własnej infrastruktury i kompetencji.</p>
+      </div>
+    </div>
+
+    <p>Równie ważne są integracja systemu AI z istniejącymi rozwiązaniami, np. systemami dokumentowymi, CRM, GIS czy narzędziami obsługi klienta, oraz zarządzanie dostępem do danych. System powinien respektować uprawnienia użytkowników i udostępniać wyłącznie informacje zgodne z ich poziomem dostępu.</p>
+    <p>Architektura powinna także umożliwiać rozwój systemu w czasie, bez konieczności jego przebudowy. Wraz ze zmieniającymi się potrzebami organizacji rozwiązanie powinno być możliwe do rozszerzania o nowe procesy i zastosowania.</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     KROK 08
+     ============================================================ -->
+<div class="chapter" id="ch08">
+  <div class="chapter-header">
+    <div class="ch-badge">
+      <span class="ch-num">08</span>
+    </div>
+    <div>
+      <div class="ch-label">Krok ósmy</div>
+      <h2>Budowa bazy wiedzy i konfiguracja systemu</h2>
+    </div>
+  </div>
+  <div class="chapter-body">
+    <p>Po przygotowaniu i podziale dokumentów na mniejsze fragmenty rozpoczyna się etap budowy bazy wiedzy oraz konfiguracji systemu. Każdy fragment przetwarzany jest na dwie uzupełniające się reprezentacje: semantyczną oraz tekstową, wykorzystywaną w klasycznym wyszukiwaniu opartym na słowach kluczowych. Takie podejście pozwala połączyć rozumienie kontekstu i znaczenia z precyzyjnym dopasowaniem konkretnych terminów. W efekcie system potrafi odnaleźć zarówno treści semantycznie powiązane z pytaniem, jak i te zawierające dokładne sformułowania użyte przez użytkownika.</p>
+    <p>W momencie zadania pytania system wyszukuje najbardziej trafne fragmenty dokumentów, a następnie dodatkowo ocenia i porządkuje wyniki tak, aby do modelu językowego trafiły wyłącznie najlepiej dopasowane informacje.</p>
+    <p>Na tej podstawie model generuje odpowiedź. Otrzymuje on zarówno pytanie użytkownika, jak i wybrane fragmenty dokumentów stanowiące kontekst. Dzięki temu odpowiedź opiera się na rzeczywistych danych organizacji, a nie wyłącznie na wiedzy modelu, co znacząco ogranicza ryzyko błędów i tzw. halucynacji.</p>
+    <p>Wybór modelu odpowiadającego za generowanie odpowiedzi wpływa nie tylko na jakość wyników, ale także na bezpieczeństwo danych i możliwości wdrożeniowe. W wielu przypadkach zastosowanie modeli rozwijanych na danych polskojęzycznych, takich jak PLLuM czy Bielik, pozwala uzyskać lepsze dopasowanie do lokalnego kontekstu językowego i prawnego oraz bardziej naturalną komunikację z użytkownikami. Dodatkowo wykorzystanie modeli otwartych zwiększa kontrolę nad danymi i sposobem działania systemu oraz ogranicza zależność od zewnętrznych dostawców technologii. Ma to szczególne znaczenie w sektorach regulowanych, gdzie istotna jest przewidywalność, transparentność i zgodność z przepisami.</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     KROK 09
+     ============================================================ -->
+<div class="chapter" id="ch09">
+  <div class="chapter-header">
+    <div class="ch-badge">
+      <span class="ch-num">09</span>
+    </div>
+    <div>
+      <div class="ch-label">Krok dziewiąty</div>
+      <h2>Testy użytkowe</h2>
+    </div>
+  </div>
+  <div class="chapter-body">
+    <p>Po uruchomieniu systemu kluczowym etapem są testy oraz jego stopniowe doskonalenie. Rozwiązania oparte na AI wymagają iteracyjnego podejścia – ich jakość poprawia się wraz z kolejnymi cyklami testów i modyfikacji.</p>
+    <p>Istotną rolę odgrywa wcześniej przygotowany benchmark, który pozwala w uporządkowany sposób ocenić działanie systemu oraz porównywać różne warianty rozwiązania. Jest on dopasowany do konkretnych danych i scenariuszy użycia, najczęściej w postaci zestawu pytań i oczekiwanych odpowiedzi lub kryteriów, które odpowiedź powinna spełniać. Pozwala to określić poziom jakości systemu i monitorować jego poprawę w czasie.</p>
+    <p>Równolegle prowadzone są testy manualne, realizowane przez zamkniętą grupę przeszkolonych użytkowników, najczęściej pracowników organizacji. Opierają się one na rzeczywistych zapytaniach i scenariuszach pracy, co pozwala ocenić nie tylko poprawność odpowiedzi, ale także ich użyteczność i dopasowanie do kontekstu. Istotnym elementem tego etapu jest zbieranie ustrukturyzowanego feedbacku dotyczącego jakości odpowiedzi – ich trafności, kompletności czy zgodności ze źródłami. Dzięki temu możliwe jest szybkie wychwycenie problemów niewidocznych w testach automatycznych, takich jak zbyt ogólne odpowiedzi czy nieodpowiedni styl komunikacji.</p>
+    <p>Wyniki testów stanowią podstawę do kolejnych usprawnień. Mogą one obejmować poprawę jakości danych, zmianę sposobu wyszukiwania informacji, dostosowanie instrukcji dla modelu czy modyfikację wybranych komponentów systemu. W praktyce nawet niewielkie zmiany w konfiguracji często pozwalają znacząco poprawić jakość odpowiedzi.</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     KROK 10
+     ============================================================ -->
+<div class="chapter" id="ch10">
+  <div class="chapter-header">
+    <div class="ch-badge">
+      <span class="ch-num">10</span>
+    </div>
+    <div>
+      <div class="ch-label">Krok dziesiąty</div>
+      <h2>Wdrożenie produkcyjne</h2>
+    </div>
+  </div>
+  <div class="chapter-body">
+    <p>Wdrożenie rozwiązania w środowisku produkcyjnym oznacza przejście od testów do codziennego wykorzystania w organizacji. Na tym etapie kluczowe stają się stabilność, wydajność oraz kontrola nad działaniem systemu. W praktyce oznacza to konieczność zadbania o kilka obszarów: aktualność bazy wiedzy, wydajność działania, jakość odpowiedzi oraz bezpieczeństwo dostępu do danych.</p>
+    <p>Baza wiedzy nie jest statyczna – pojawiają się nowe dokumenty, a istniejące wymagają aktualizacji. Proces ten powinien być możliwie zautomatyzowany i realizowany w sposób, który nie zakłóca działania systemu.</p>
+    <p>Istotna jest również wydajność rozwiązania. System musi obsługiwać wielu użytkowników jednocześnie i dostarczać odpowiedzi w akceptowalnym czasie. W praktyce wymaga to optymalizacji całego procesu – od wyszukiwania informacji po generowanie odpowiedzi – oraz dopasowania infrastruktury do rzeczywistych potrzeb.</p>
+    <p>Nie mniej ważne jest monitorowanie jakości działania systemu. Obejmuje ono analizę zapytań, ocenę trafności odpowiedzi oraz zbieranie informacji zwrotnej od użytkowników, co pozwala szybko identyfikować problemy i wprowadzać niezbędne poprawki.</p>
+    <p>Kolejnym elementem jest zarządzanie bezpieczeństwem i dostępem do danych. System powinien uwzględniać uprawnienia użytkowników i udostępniać wyłącznie informacje zgodne z ich poziomem dostępu, co ma szczególne znaczenie w przypadku danych wrażliwych.</p>
+    <p>Istotne jest wreszcie zarządzanie zmianą. Systemy AI podlegają ciągłemu rozwojowi – modele są aktualizowane, prompty modyfikowane, zmienia się także logika wyszukiwania. Dlatego konieczne jest wprowadzenie mechanizmów kontroli wersji, które pozwalają bezpiecznie wprowadzać zmiany i w razie potrzeby wrócić do wcześniejszych, stabilnych wersji systemu.</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     KROK 11
+     ============================================================ -->
+<div class="chapter" id="ch11">
+  <div class="chapter-header">
+    <div class="ch-badge">
+      <span class="ch-num">11</span>
+    </div>
+    <div>
+      <div class="ch-label">Krok jedenasty</div>
+      <h2>Szkolenie użytkowników</h2>
+    </div>
+  </div>
+  <div class="chapter-body">
+    <p>Nawet najlepiej zaprojektowany system AI nie przyniesie oczekiwanych rezultatów, jeśli jego użytkownicy nie będą wiedzieli, jak z niego korzystać – i dlaczego warto to robić. Szkolenie jest krytycznym elementem każdego wdrożenia, a jego pominięcie lub nieodpowiednie przygotowanie należy do najczęstszych przyczyn problemów z wykorzystaniem nowych narzędzi. Dotyczy to w szczególności rozwiązań opartych na AI, które zmieniają nie tylko narzędzia pracy, ale również sposób wykonywania zadań.</p>
+    <p>Skuteczne szkolenie powinno obejmować trzy komplementarne wymiary. Pierwszy to zbudowanie podstawowego zrozumienia działania AI i modeli językowych. Nie chodzi tu o wykład z informatyki, lecz o przekazanie intuicyjnego zrozumienia, jak działa system i jakie ma ograniczenia.</p>
+    <p>Drugi wymiar dotyczy konkretnego narzędzia wdrożonego w organizacji. Użytkownicy powinni wiedzieć, czego mogą się spodziewać: że system opiera się na określonej bazie wiedzy, że jakość odpowiedzi zależy od sposobu zadawania pytań oraz że w niektórych sytuacjach konieczna jest weryfikacja uzyskanych informacji.</p>
+    <p>Trzeci wymiar obejmuje wykorzystanie systemu w realnych procesach organizacji. Szkolenie powinno więc pokazywać, w których momentach procesu warto sięgnąć po wsparcie systemu, jak wygląda to w praktyce i jakie zmiany wprowadza w dotychczasowym sposobie działania. Najlepiej sprawdzają się scenariusze oparte na rzeczywistych zadaniach użytkowników – dzięki temu szkolenie nie jest abstrakcyjne, lecz bezpośrednio przekłada się na codzienną pracę.</p>
+    <p>Niezależnie od wewnętrznych potrzeb organizacji, obowiązek prowadzenia szkoleń wynika również z regulacji prawnych. AI Act nakłada na podmioty wykorzystujące systemy AI obowiązek zapewnienia odpowiedniego poziomu wiedzy użytkowników. Oznacza to, że szkolenia z zakresu AI nie są jedynie dobrą praktyką, lecz wymogiem regulacyjnym, który powinien zostać uwzględniony w planie każdego wdrożenia.</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     CLOSING PAGE
+     ============================================================ -->
+<div class="closing-page">
+
+  <div class="closing-brand"><strong>Quantica</strong> Labs</div>
+
+  <div class="closing-main">
+    <div class="closing-kicker">Od pomysłu do wdrożenia</div>
+    <h2 class="closing-title">
+      Pomagamy organizacjom<br>
+      <em>wdrażać AI</em><br>
+      w sposób przemyślany.
+    </h2>
+    <div class="closing-body">
+      <p>Organizacje, które podchodzą do AI w sposób świadomy i uporządkowany, stosunkowo szybko zaczynają dostrzegać realne efekty: oszczędność czasu, szybszy dostęp do wiedzy czy lepszą jakość podejmowanych decyzji. Wdrożenie AI warto jednak traktować nie jako jednorazowy projekt technologiczny, lecz jako proces wymagający odpowiedniego przygotowania, doświadczenia i współpracy różnych zespołów. Kompleksowy charakter wdrożeń AI powoduje, że wybór partnera, który potrafi przeprowadzić organizację przez wszystkie opisane etapy jest kluczowy.</p>
+      <p>W Quantica Lab pomagamy organizacjom projektować, wdrażać i rozwijać rozwiązania AI dopasowane do ich procesów, danych i wymagań bezpieczeństwa. Zapraszamy do współpracy.</p>
+    </div>
+  </div>
+
+  <div class="closing-foot">
+    <div class="closing-foot-brand"><strong>Quantica</strong> Labs</div>
+    <div class="closing-foot-meta">
+      Praktyka AI<br>
+      Maj 2026 · Numer drugi
+    </div>
+  </div>
+
+</div>
+
+<!-- Paged.js — CSS Paged Media polyfill -->
+<script src="https://unpkg.com/pagedjs/dist/paged.polyfill.js"></script>
+
+<script>
+  // Move control bar above Paged.js page wrapper after pagination
+  window.PagedConfig = {
+    auto: true,
+    after(flow) {
+      // Paged.js is done — make sure control bar stays on top
+      const bar = document.getElementById('controls');
+      if (bar) document.body.appendChild(bar);
+    }
+  };
+</script>
+
+</body>
+</html>
