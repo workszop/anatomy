@@ -90,11 +90,10 @@
    PAGED MEDIA — PAGE SETUP
    ============================================================ */
 
-/* Default page */
+/* Default content pages — margins give Paged.js room for running headers */
 @page {
   size: A4;
-  /* margin: 0 removes the space Chrome uses for URL/date/page-number decorations */
-  margin: 0;
+  margin: 20mm 18mm 18mm 22mm;
 
   @top-left {
     content: "Quantica Labs";
@@ -104,7 +103,7 @@
     letter-spacing: 0.18em;
     color: var(--ink-3);
     border-bottom: 0.5pt solid var(--ink);
-    padding: 8mm 0 4mm 22mm;
+    padding-bottom: 3mm;
     vertical-align: bottom;
     width: 50%;
   }
@@ -117,7 +116,7 @@
     letter-spacing: 0.12em;
     color: var(--ink-3);
     border-bottom: 0.5pt solid var(--ink);
-    padding: 8mm 18mm 4mm 0;
+    padding-bottom: 3mm;
     vertical-align: bottom;
     text-align: right;
     width: 50%;
@@ -128,32 +127,32 @@
     font-family: 'JetBrains Mono', monospace;
     font-size: 9pt;
     color: var(--ink-3);
-    padding-top: 5mm;
+    padding-top: 4mm;
     vertical-align: top;
   }
 }
 
-/* Cover — no header/footer, no margins, full bleed */
+/* Cover — full bleed, no header/footer */
 @page cover {
   margin: 0;
   background: var(--ink);
-  @top-left   { content: none; border: none; }
-  @top-right  { content: none; border: none; }
+  @top-left      { content: none; border: none; padding: 0; }
+  @top-right     { content: none; border: none; padding: 0; }
   @bottom-center { content: none; }
 }
 
-/* TOC + intro — suppress running header on these opening pages */
+/* TOC + intro — suppress running header, keep page numbers */
 @page front-matter {
-  @top-left  { content: none; border: none; }
-  @top-right { content: none; border: none; }
+  @top-left  { content: none; border: none; padding: 0; }
+  @top-right { content: none; border: none; padding: 0; }
 }
 
-/* Closing/CTA — dark, no header/footer */
+/* Closing — full bleed, no header/footer */
 @page closing {
   margin: 0;
   background: var(--ink);
-  @top-left   { content: none; border: none; }
-  @top-right  { content: none; border: none; }
+  @top-left      { content: none; border: none; padding: 0; }
+  @top-right     { content: none; border: none; padding: 0; }
   @bottom-center { content: none; }
 }
 
@@ -183,7 +182,6 @@ h2 { string-set: chapterName content(); }
   break-after: page;
   background: var(--ink);
   color: var(--paper);
-  width: 210mm;
   height: 297mm;
   display: grid;
   grid-template-rows: auto 1fr auto;
@@ -266,7 +264,7 @@ h2 { string-set: chapterName content(); }
 .toc-page {
   page: front-matter;
   break-after: page;
-  padding: 24mm 22mm 22mm;
+  padding: 6mm 0 8mm;
 }
 
 .toc-section-label {
@@ -355,7 +353,7 @@ h2 { string-set: chapterName content(); }
 .intro-section {
   page: front-matter;
   break-after: page;
-  padding: 18mm 22mm 22mm;
+  padding: 6mm 0 8mm;
 }
 
 /* ============================================================
@@ -363,7 +361,7 @@ h2 { string-set: chapterName content(); }
    ============================================================ */
 .chapter {
   break-before: page;
-  padding: 20mm 22mm 22mm;
+  padding: 6mm 0 8mm;
 }
 
 .chapter-header {
@@ -373,6 +371,8 @@ h2 { string-set: chapterName content(); }
   padding-bottom: 7mm;
   margin-bottom: 7mm;
   border-bottom: 0.7pt solid var(--ink);
+  break-inside: avoid;
+  break-after: avoid;
 }
 
 .ch-badge {
@@ -502,6 +502,7 @@ blockquote.pull::before {
   margin-bottom: 7mm;
   padding-bottom: 6mm;
   border-bottom: 0.7pt solid var(--ink);
+  break-after: avoid;
 }
 
 /* ============================================================
@@ -512,7 +513,6 @@ blockquote.pull::before {
   break-before: page;
   background: var(--ink);
   color: var(--paper);
-  width: 210mm;
   height: 297mm;
   display: grid;
   grid-template-rows: auto 1fr auto;
@@ -595,9 +595,14 @@ blockquote.pull::before {
 }
 
 /* ============================================================
-   PRINT: hide control bar
+   PRINT: hide control bar + suppress Chrome browser headers
    ============================================================ */
 @media print {
+  /* margin: 0 removes the margin area Chrome uses for URL/date/page-number text.
+     Paged.js has already placed running headers inside its own page boxes, so
+     they print as part of the DOM — no Chrome margin area needed. */
+  @page { margin: 0; }
+
   #controls { display: none !important; }
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 }
