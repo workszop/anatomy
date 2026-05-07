@@ -410,12 +410,14 @@
 
   /* --- print / pdf styles --- */
   @media print {
+    /* margin: 0 removes the space Chrome uses for its URL/date/page-number
+       headers and footers — they simply have nowhere to render */
     @page {
       size: A4;
-      margin: 18mm 20mm 18mm 20mm;
+      margin: 0;
     }
 
-    /* force background and color rendering */
+    /* force background and colour rendering */
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 
     /* hide ui chrome */
@@ -423,36 +425,38 @@
     .pdf-btn,
     .masthead .right { display: none !important; }
 
-    /* masthead: static, no sticky */
-    .masthead {
-      position: static;
-      padding: 10px 0;
-      border-bottom: 2px solid #1a1410;
-    }
-
     /* remove paper grain */
     body::before { display: none; }
 
+    /* top/bottom page margins via body padding (replaces @page margin) */
     body {
       background: #f4ede1;
       font-size: 11pt;
       line-height: 1.55;
+      padding: 12mm 0 14mm;
+    }
+
+    /* masthead: static, side padding provides left/right margins */
+    .masthead {
+      position: static;
+      padding: 10px 20mm;
+      border-bottom: 2px solid #1a1410;
     }
 
     /* hero: single column, compact */
-    .hero { padding: 24px 0 20px; border-bottom: 1px solid #1a1410; }
+    .hero { padding: 24px 20mm 20px; border-bottom: 1px solid #1a1410; }
     .hero-grid { grid-template-columns: 1fr; gap: 20px; }
     h1.title { font-size: 48pt; line-height: 0.92; margin-bottom: 16px; }
     .hero .deck { font-size: 13pt; }
     .byline { margin-top: 16px; padding: 10px 0; }
 
     /* toc */
-    .toc { padding: 20px 0; margin: 16px 0; grid-template-columns: 120px 1fr; gap: 24px; }
+    .toc { padding: 20px 20mm; margin: 16px 0; grid-template-columns: 120px 1fr; gap: 24px; }
     .toc-list { columns: 2; column-gap: 32px; }
     .toc-list li { font-size: 10pt; padding: 5px 0; }
 
-    /* article wrapper: no horizontal padding (page margins handle it) */
-    .article { padding: 0; }
+    /* article wrapper: side padding = left/right page margin */
+    .article { padding: 0 20mm; }
 
     /* chapters: single column */
     section.chapter {
@@ -511,7 +515,7 @@
     }
     .contrast > div { padding: 14px 20px; }
 
-    /* cta section */
+    /* cta: full-bleed dark block, inner content gets the side padding */
     .cta-section {
       margin-top: 32px;
       padding: 32px 0;
@@ -519,13 +523,13 @@
       page-break-before: always;
       break-before: always;
     }
-    .cta-inner { grid-template-columns: 1fr; gap: 20px; }
+    .cta-inner { grid-template-columns: 1fr; gap: 20px; padding: 0 20mm; }
     .cta-inner h2 { font-size: 24pt; }
     .cta-inner p { font-size: 11pt; }
 
     /* footer */
     footer.colophon {
-      padding: 24px 0;
+      padding: 24px 20mm;
       border-top: 1px solid #1a1410;
     }
   }
