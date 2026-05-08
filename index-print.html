@@ -6,12 +6,12 @@
 <title>AI w organizacji · Quantica Labs — Wersja do druku</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Newsreader:ital,wght@0,300;0,400;0,500;0,600;1,400;1,600&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,300;1,6..72,400;1,6..72,600&family=Source+Serif+4:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,600;1,6..72,300;1,6..72,400&display=swap" rel="stylesheet">
 <style>
 
-/* ============================================================
+/* ─────────────────────────────────────────
    TOKENS
-   ============================================================ */
+───────────────────────────────────────── */
 :root {
   --paper:   #f4ede1;
   --paper-2: #ece3d3;
@@ -19,376 +19,337 @@
   --ink-2:   #463a30;
   --ink-3:   #7a6a5a;
   --accent:  #c4502c;
-  --rule:    rgba(26,20,16,.13);
+
+  /* Page geometry */
+  --w: 210mm;
+  --h: 297mm;
+  --ml: 22mm;   /* left  / binding */
+  --mr: 16mm;   /* right */
+  --mt: 20mm;   /* top   – running header lives in this space */
+  --mb: 18mm;   /* bottom */
 }
 
-/* ============================================================
-   SCREEN CHROME: control bar + page preview
-   ============================================================ */
-#controls {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: 52px;
-  background: var(--ink);
-  color: var(--paper);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 28px;
-  z-index: 9999;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  gap: 16px;
-}
-#controls .bar-label { opacity: 0.55; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#controls .bar-label em { color: var(--accent); font-style: normal; opacity: 1; }
-#controls .bar-right { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
-#controls .bar-hint { display: none; }
-
-.save-btn {
-  background: var(--accent);
-  color: var(--paper);
-  border: none;
-  padding: 9px 22px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  cursor: pointer;
-  border-radius: 2px;
-  transition: opacity .15s;
-  white-space: nowrap;
-}
-.save-btn:hover { opacity: 0.82; }
-
-/* Paged.js wraps everything in .pagedjs_pages */
-@media screen {
-  body { background: #cfc8bc; }
-
-  .pagedjs_pages {
-    padding: 52px 40px 60px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 28px;
-  }
-
-  .pagedjs_page {
-    box-shadow: 0 6px 32px rgba(0,0,0,.22), 0 1px 4px rgba(0,0,0,.12);
-  }
-
-  /* dark page boxes */
-  .pagedjs_named_page.pagedjs_cover_page .pagedjs_page,
-  .pagedjs_named_page.pagedjs_closing_page .pagedjs_page {
-    background: var(--ink);
-  }
-}
-
-/* ============================================================
-   PAGED MEDIA — PAGE SETUP
-   ============================================================ */
-
-/* Default content pages — margins give Paged.js room for running headers */
-@page {
-  size: A4;
-  margin: 20mm 18mm 18mm 22mm;
-
-  @top-left {
-    content: "Quantica Labs";
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 7.5pt;
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    color: var(--ink-3);
-    border-bottom: 0.5pt solid var(--ink);
-    padding-bottom: 3mm;
-    vertical-align: bottom;
-    width: 50%;
-  }
-
-  @top-right {
-    content: string(chapterName);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 7.5pt;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--ink-3);
-    border-bottom: 0.5pt solid var(--ink);
-    padding-bottom: 3mm;
-    vertical-align: bottom;
-    text-align: right;
-    width: 50%;
-  }
-
-  @bottom-center {
-    content: counter(page);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9pt;
-    color: var(--ink-3);
-    padding-top: 4mm;
-    vertical-align: top;
-  }
-}
-
-/* Cover — full bleed, no header/footer */
-@page cover {
-  margin: 0;
-  background: var(--ink);
-  @top-left      { content: none; border: none; padding: 0; }
-  @top-right     { content: none; border: none; padding: 0; }
-  @bottom-center { content: none; }
-}
-
-/* TOC + intro — suppress running header, keep page numbers */
-@page front-matter {
-  @top-left  { content: none; border: none; padding: 0; }
-  @top-right { content: none; border: none; padding: 0; }
-}
-
-/* Closing — full bleed, no header/footer */
-@page closing {
-  margin: 0;
-  background: var(--ink);
-  @top-left      { content: none; border: none; padding: 0; }
-  @top-right     { content: none; border: none; padding: 0; }
-  @bottom-center { content: none; }
-}
-
-/* ============================================================
-   BASE TYPOGRAPHY
-   ============================================================ */
+/* ─────────────────────────────────────────
+   RESET & BASE
+───────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
   font-family: 'Source Serif 4', Georgia, serif;
   font-size: 11pt;
-  line-height: 1.65;
+  line-height: 1.64;
   color: var(--ink);
   background: var(--paper);
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
+  font-feature-settings: "kern","liga","onum";
 }
 
-/* h2 content feeds the running header */
-h2 { string-set: chapterName content(); }
-
-/* ============================================================
-   COVER PAGE
-   ============================================================ */
-.cover-page {
-  page: cover;
-  break-after: page;
+/* ─────────────────────────────────────────
+   SCREEN CONTROL BAR
+───────────────────────────────────────── */
+#bar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 48px;
+  z-index: 9999;
   background: var(--ink);
   color: var(--paper);
-  height: 297mm;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  padding: 22mm;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  gap: 12px;
+}
+#bar .bl { opacity: 0.45; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#bar .bl em { color: var(--accent); font-style: normal; opacity: 1; }
+#bar .br { flex-shrink: 0; }
+#bar button {
+  background: var(--accent);
+  color: var(--paper);
+  border: none;
+  padding: 8px 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  border-radius: 2px;
+  white-space: nowrap;
+  transition: opacity .15s;
+}
+#bar button:hover { opacity: 0.82; }
+
+/* ─────────────────────────────────────────
+   SCREEN: page-card preview
+───────────────────────────────────────── */
+@media screen {
+  body {
+    background: #beb7af;
+    padding: 64px 20px 72px;   /* clear bar + breathing room */
+  }
+
+  /* Every section is an A4-width card */
+  .pg {
+    width: var(--w);
+    background: var(--paper);
+    box-shadow: 0 6px 28px rgba(0,0,0,.22), 0 1px 4px rgba(0,0,0,.10);
+    margin: 0 auto 20px;
+    padding: var(--mt) var(--mr) var(--mb) var(--ml);
+    position: relative;
+  }
+
+  /* Dark full-page cards */
+  .pg.cover, .pg.closing {
+    height: var(--h);
+    background: var(--ink);
+    color: var(--paper);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 22mm;
+  }
+
+  /* Visual page-break hint between content sections */
+  .pg + .pg::before {
+    content: '';
+    display: block;
+    height: 1px;   /* collapsed – just keeps the margin gap */
+  }
 }
 
+/* ─────────────────────────────────────────
+   PRINT: @page
+   margin: 0 → no Chrome URL / date decorations
+   Page numbers live in a fixed footer instead
+───────────────────────────────────────── */
+@media print {
+  @page { size: A4; margin: 0; }
+
+  #bar { display: none !important; }
+
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+  /* Each section starts on a fresh page */
+  .pg {
+    width: var(--w);
+    padding: var(--mt) var(--mr) var(--mb) var(--ml);
+    break-before: page;
+    position: relative;
+  }
+  .pg:first-child { break-before: auto; }
+
+  /* Full-bleed dark pages sit above the fixed running header */
+  .pg.cover, .pg.closing {
+    height: var(--h);
+    background: var(--ink) !important;
+    color: var(--paper) !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 22mm !important;
+    position: relative;
+    z-index: 10;   /* covers the fixed running header on those pages */
+  }
+}
+
+/* ─────────────────────────────────────────
+   PRINT: running header  (position:fixed → every page)
+───────────────────────────────────────── */
+.rh {
+  display: none;   /* hidden on screen */
+}
+
+@media print {
+  .rh {
+    display: flex;
+    position: fixed;
+    top: 7mm;
+    left: var(--ml);
+    right: var(--mr);
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-bottom: 2.5mm;
+    border-bottom: 0.4pt solid var(--ink);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 7pt;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--ink-3);
+    z-index: 1;
+  }
+}
+
+/* ─────────────────────────────────────────
+   PRINT: page number footer  (position:fixed)
+───────────────────────────────────────── */
+.rf {
+  display: none;
+}
+
+@media print {
+  .rf {
+    display: block;
+    position: fixed;
+    bottom: 5.5mm;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8.5pt;
+    color: var(--ink-3);
+    z-index: 1;
+  }
+}
+
+/* ─────────────────────────────────────────
+   COVER PAGE
+───────────────────────────────────────── */
 .cover-brand {
   font-family: 'Newsreader', serif;
   font-style: italic;
-  font-size: 16pt;
-  color: var(--paper-2);
+  font-size: 15pt;
+  color: rgba(244,237,225,.55);
   letter-spacing: -0.01em;
 }
-.cover-brand strong { font-style: normal; font-weight: 700; color: var(--paper); }
+.cover-brand strong { font-style: normal; font-weight: 600; color: var(--paper); }
 
-.cover-main { display: flex; flex-direction: column; justify-content: center; }
+.cover-main { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 12mm; }
 
 .cover-kicker {
   font-family: 'JetBrains Mono', monospace;
   font-size: 8pt;
   text-transform: uppercase;
-  letter-spacing: 0.24em;
+  letter-spacing: 0.26em;
   color: var(--accent);
-  margin-bottom: 10mm;
+  margin-bottom: 9mm;
   display: flex;
   align-items: center;
-  gap: 6mm;
+  gap: 5mm;
 }
 .cover-kicker::before {
   content: '';
   display: inline-block;
-  width: 14mm;
-  height: 0.6pt;
+  width: 12mm;
+  height: 0.5pt;
   background: var(--accent);
   flex-shrink: 0;
 }
 
 .cover-title {
   font-family: 'Newsreader', serif;
-  font-weight: 400;
-  font-size: 38pt;
-  line-height: 1.02;
-  letter-spacing: -0.025em;
+  font-weight: 300;
+  font-size: 44pt;
+  line-height: 1.0;
+  letter-spacing: -0.03em;
   color: var(--paper);
-  margin-bottom: 6mm;
+  margin-bottom: 0;
+  font-optical-sizing: auto;
 }
 .cover-title em { font-style: italic; color: var(--accent); }
 
-.cover-desc {
-  font-family: 'Source Serif 4', serif;
-  font-size: 11pt;
-  color: var(--paper-2);
-  opacity: 0.7;
-  line-height: 1.55;
-  max-width: 120mm;
-  margin-bottom: 14mm;
-}
-
-.cover-rule {
-  width: 100%;
-  height: 0.5pt;
-  background: rgba(244,237,225,0.18);
-  margin: 0 0 6mm;
-}
-
 .cover-foot {
+  border-top: 0.4pt solid rgba(244,237,225,.2);
+  padding-top: 5mm;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
   font-family: 'JetBrains Mono', monospace;
   font-size: 7.5pt;
   text-transform: uppercase;
   letter-spacing: 0.18em;
-  color: var(--ink-3);
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+  color: rgba(122,106,90,.7);
 }
 
-/* ============================================================
-   TOC PAGE
-   ============================================================ */
-.toc-page {
-  page: front-matter;
-  break-after: page;
-  padding: 6mm 0 8mm;
-}
-
-.toc-section-label {
+/* ─────────────────────────────────────────
+   TABLE OF CONTENTS
+───────────────────────────────────────── */
+.toc-label {
   font-family: 'JetBrains Mono', monospace;
   font-size: 7.5pt;
   text-transform: uppercase;
   letter-spacing: 0.22em;
   color: var(--accent);
-  margin-bottom: 8mm;
+  margin-bottom: 6mm;
   display: flex;
   align-items: center;
-  gap: 5mm;
+  gap: 4mm;
 }
-.toc-section-label::before {
+.toc-label::before {
   content: '';
   display: inline-block;
-  width: 10mm;
-  height: 0.5pt;
+  width: 8mm;
+  height: 0.4pt;
   background: var(--accent);
-  flex-shrink: 0;
 }
 
-.toc-heading {
+.toc-title {
   font-family: 'Newsreader', serif;
-  font-size: 28pt;
+  font-size: 26pt;
   font-weight: 400;
   letter-spacing: -0.02em;
-  line-height: 1.05;
   color: var(--ink);
   margin-bottom: 10mm;
+  line-height: 1.05;
 }
 
-.toc-items {
+.toc-list {
   list-style: none;
-  border-top: 0.7pt solid var(--ink);
+  border-top: 0.5pt solid var(--ink);
 }
-
-.toc-items li {
-  display: flex;
-  align-items: baseline;
-  padding: 3.8mm 0;
-  border-bottom: 0.5pt solid var(--rule);
+.toc-list li {
+  display: grid;
+  grid-template-columns: 9mm 1fr;
+  gap: 0 4mm;
+  padding: 3.5mm 0;
+  border-bottom: 0.4pt solid rgba(26,20,16,.1);
+  font-size: 10.5pt;
+  break-inside: avoid;
 }
-
-.toc-items li a {
-  color: var(--ink);
-  text-decoration: none;
-  flex: 1;
-  font-family: 'Source Serif 4', serif;
-  font-size: 11pt;
-}
-
 .toc-n {
   font-family: 'JetBrains Mono', monospace;
   font-size: 7.5pt;
-  font-weight: 500;
   color: var(--accent);
-  letter-spacing: 0.08em;
-  min-width: 9mm;
-  padding-top: 1pt;
-  flex-shrink: 0;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  padding-top: 2pt;
 }
+.toc-t { color: var(--ink); line-height: 1.4; }
 
-.toc-pg {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 8.5pt;
-  color: var(--ink-3);
-  min-width: 8mm;
-  text-align: right;
-  flex-shrink: 0;
-}
-/* auto page numbers via Paged.js target-counter */
-.toc-pg::after { content: target-counter(attr(href), page); }
+/* ─────────────────────────────────────────
+   CHAPTER SECTIONS
+───────────────────────────────────────── */
 
-.toc-dots {
-  flex: 0 1 auto;
-  border-bottom: 0.5pt dotted var(--ink-3);
-  margin: 0 3mm 2pt;
-  align-self: flex-end;
-  min-width: 8mm;
-}
-
-/* ============================================================
-   INTRO SECTION (00)
-   ============================================================ */
-.intro-section {
-  page: front-matter;
-  break-after: page;
-  padding: 6mm 0 8mm;
-}
-
-/* ============================================================
-   CHAPTERS
-   ============================================================ */
-.chapter {
-  break-before: page;
-  padding: 6mm 0 8mm;
-}
-
-.chapter-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 6mm;
+/* Chapter header block */
+.ch-head {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0 6mm;
+  align-items: start;
   padding-bottom: 7mm;
   margin-bottom: 7mm;
-  border-bottom: 0.7pt solid var(--ink);
+  border-bottom: 0.5pt solid var(--ink);
   break-inside: avoid;
   break-after: avoid;
 }
 
-.ch-badge {
-  flex-shrink: 0;
-}
-
 .ch-num {
   font-family: 'Newsreader', serif;
-  font-size: 42pt;
   font-weight: 300;
   font-style: italic;
-  color: var(--accent);
+  font-size: 40pt;
   line-height: 1;
+  color: var(--accent);
   letter-spacing: -0.02em;
-  display: block;
+  font-optical-sizing: auto;
+  padding-top: 2pt;
 }
+
+.ch-meta { display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 1mm; }
 
 .ch-label {
   font-family: 'JetBrains Mono', monospace;
@@ -397,42 +358,56 @@ h2 { string-set: chapterName content(); }
   letter-spacing: 0.2em;
   color: var(--ink-3);
   margin-bottom: 2mm;
-  margin-top: 2mm;
 }
 
 h2 {
   font-family: 'Newsreader', serif;
   font-weight: 500;
   font-size: 21pt;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
+  letter-spacing: -0.022em;
+  line-height: 1.08;
   color: var(--ink);
+  font-optical-sizing: auto;
 }
 h2 em { font-style: italic; font-weight: 400; color: var(--accent); }
 
-.chapter-body p {
-  margin-bottom: 0.8em;
+/* Intro section heading (larger, no chapter number) */
+.intro-head {
+  padding-bottom: 7mm;
+  margin-bottom: 7mm;
+  border-bottom: 0.5pt solid var(--ink);
+  break-after: avoid;
+}
+.intro-head h2 { font-size: 24pt; }
+
+/* ─────────────────────────────────────────
+   BODY TYPOGRAPHY
+───────────────────────────────────────── */
+.body p {
+  margin-bottom: 0.78em;
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
   orphans: 3;
   widows: 3;
 }
 
-/* drop cap on first paragraph of chapter body */
-.chapter-body > p:first-of-type { display: flow-root; }
-.chapter-body > p:first-of-type::first-letter {
+/* Drop cap – first paragraph of each chapter */
+.body.dropcap > p:first-of-type { display: flow-root; }
+.body.dropcap > p:first-of-type::first-letter {
   font-family: 'Newsreader', serif;
   font-weight: 600;
   float: left;
   font-size: 4.2em;
-  line-height: 0.86;
-  padding: 4pt 7pt 0 0;
+  line-height: 0.84;
+  padding: 3pt 7pt 0 0;
   color: var(--accent);
 }
-.no-dropcap > p:first-of-type::first-letter { all: unset; }
 
-/* pull quote */
+/* Pull quote */
 blockquote.pull {
   margin: 6mm 0;
-  padding: 4.5mm 7mm;
+  padding: 4mm 6mm;
   border-top: 0.5pt solid var(--ink);
   border-bottom: 0.5pt solid var(--ink);
   font-family: 'Newsreader', serif;
@@ -447,301 +422,194 @@ blockquote.pull {
 blockquote.pull::before {
   content: '\201C';
   position: absolute;
-  top: -5pt; left: -4pt;
-  font-size: 44pt;
+  top: -6pt; left: -3pt;
+  font-size: 42pt;
+  line-height: 1;
   color: var(--accent);
   font-family: 'Newsreader', serif;
-  line-height: 1;
 }
 
-/* contrast / two-column box */
+/* Two-column contrast box */
 .contrast {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  border-top: 0.7pt solid var(--ink);
-  border-bottom: 0.7pt solid var(--ink);
+  border-top: 0.5pt solid var(--ink);
+  border-bottom: 0.5pt solid var(--ink);
   margin: 5mm 0;
   break-inside: avoid;
 }
-.contrast > div { padding: 4.5mm 5.5mm; font-size: 10pt; line-height: 1.55; }
-.contrast > div + div { border-left: 0.5pt solid var(--rule); }
+.contrast > div { padding: 4mm 5mm; font-size: 10pt; line-height: 1.55; }
+.contrast > div + div { border-left: 0.4pt solid rgba(26,20,16,.12); }
 .contrast h4 {
   font-family: 'JetBrains Mono', monospace;
   font-size: 7pt;
   text-transform: uppercase;
   letter-spacing: 0.18em;
-  margin-bottom: 2.5mm;
   color: var(--accent);
   font-weight: 500;
+  margin-bottom: 2.5mm;
 }
-.contrast p { margin: 0; }
+.contrast p { margin: 0; text-align: left; hyphens: none; }
 
-/* intro section heading style */
-.intro-kicker {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 7.5pt;
-  text-transform: uppercase;
-  letter-spacing: 0.22em;
-  color: var(--accent);
-  margin-bottom: 7mm;
-  display: flex;
-  align-items: center;
-  gap: 5mm;
-}
-.intro-kicker::before {
-  content: '';
-  display: inline-block;
-  width: 10mm;
-  height: 0.5pt;
-  background: var(--accent);
-  flex-shrink: 0;
-}
-
-.intro-section h2 {
-  font-size: 26pt;
-  margin-bottom: 7mm;
-  padding-bottom: 6mm;
-  border-bottom: 0.7pt solid var(--ink);
-  break-after: avoid;
-}
-
-/* ============================================================
-   CLOSING / CTA PAGE
-   ============================================================ */
-.closing-page {
-  page: closing;
-  break-before: page;
-  background: var(--ink);
-  color: var(--paper);
-  height: 297mm;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  padding: 22mm;
-}
-
+/* ─────────────────────────────────────────
+   CLOSING PAGE
+───────────────────────────────────────── */
 .closing-brand {
   font-family: 'Newsreader', serif;
   font-style: italic;
-  font-size: 16pt;
-  color: var(--paper-2);
+  font-size: 15pt;
+  color: rgba(244,237,225,.55);
 }
-.closing-brand strong { font-style: normal; font-weight: 700; color: var(--paper); }
+.closing-brand strong { font-style: normal; font-weight: 600; color: var(--paper); }
 
-.closing-main { display: flex; flex-direction: column; justify-content: center; }
+.closing-main { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 10mm; }
 
 .closing-kicker {
   font-family: 'JetBrains Mono', monospace;
   font-size: 8pt;
   text-transform: uppercase;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.24em;
   color: var(--accent);
-  margin-bottom: 9mm;
+  margin-bottom: 8mm;
   display: flex;
   align-items: center;
-  gap: 6mm;
+  gap: 5mm;
 }
 .closing-kicker::before {
   content: '';
   display: inline-block;
-  width: 14mm;
-  height: 0.6pt;
+  width: 12mm;
+  height: 0.5pt;
   background: var(--accent);
   flex-shrink: 0;
 }
 
 .closing-title {
   font-family: 'Newsreader', serif;
-  font-weight: 400;
-  font-size: 34pt;
-  line-height: 1.05;
-  letter-spacing: -0.025em;
+  font-weight: 300;
+  font-size: 36pt;
+  line-height: 1.04;
+  letter-spacing: -0.028em;
   color: var(--paper);
-  margin-bottom: 8mm;
+  margin-bottom: 7mm;
+  font-optical-sizing: auto;
 }
 .closing-title em { font-style: italic; color: var(--accent); }
 
 .closing-body {
   font-size: 11pt;
-  color: var(--paper-2);
-  line-height: 1.62;
-  max-width: 115mm;
+  line-height: 1.6;
+  color: rgba(236,227,211,.72);
+  max-width: 118mm;
 }
-.closing-body p { margin-bottom: 0.75em; }
+.closing-body p { margin-bottom: 0.7em; }
 
 .closing-foot {
-  border-top: 0.5pt solid rgba(244,237,225,.18);
-  padding-top: 6mm;
+  border-top: 0.4pt solid rgba(244,237,225,.18);
+  padding-top: 5mm;
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
 }
-
 .closing-foot-brand {
   font-family: 'Newsreader', serif;
   font-style: italic;
-  font-size: 20pt;
+  font-size: 19pt;
   color: var(--paper);
 }
-.closing-foot-brand strong { font-style: normal; font-weight: 700; }
-
+.closing-foot-brand strong { font-style: normal; font-weight: 600; }
 .closing-foot-meta {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 7.5pt;
+  font-size: 7pt;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  color: var(--ink-3);
+  color: rgba(122,106,90,.65);
   text-align: right;
   line-height: 1.7;
-}
-
-/* ============================================================
-   PRINT: hide control bar + suppress Chrome browser headers
-   ============================================================ */
-@media print {
-  /* margin: 0 removes the margin area Chrome uses for URL/date/page-number text.
-     Paged.js has already placed running headers inside its own page boxes, so
-     they print as part of the DOM — no Chrome margin area needed. */
-  @page { margin: 0; }
-
-  #controls { display: none !important; }
-  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 }
 
 </style>
 </head>
 <body>
 
-<!-- ============ CONTROL BAR (screen only) ============ -->
-<div id="controls">
-  <span class="bar-label"><em>Quantica Labs</em> — Podgląd druku · AI w organizacji</span>
-  <div class="bar-right">
-    <span class="bar-hint">Ctrl+P → Zapisz jako PDF</span>
-    <button class="save-btn" onclick="window.print()">↓ Zapisz jako PDF</button>
-  </div>
+<!-- Running header: appears on every printed page via position:fixed.
+     Cover and closing pages hide it with z-index + opaque background. -->
+<div class="rh">
+  <span>Quantica Labs · Praktyka AI</span>
+  <span>AI w organizacji · 11 kroków</span>
 </div>
 
-<!-- ============================================================
-     COVER PAGE
-     ============================================================ -->
-<div class="cover-page">
+<!-- Page number footer: position:fixed, appears on every printed page -->
+<div class="rf" id="pgnum"></div>
+
+<!-- Screen control bar -->
+<div id="bar">
+  <span class="bl"><em>Quantica Labs</em> — Wersja do druku · AI w organizacji</span>
+  <span class="br"><button onclick="window.print()">↓ Zapisz jako PDF</button></span>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     COVER
+══════════════════════════════════════ -->
+<div class="pg cover">
 
   <div class="cover-brand"><strong>Quantica</strong> Labs</div>
 
   <div class="cover-main">
-    <div class="cover-kicker">Praktyka AI · Poradnik wdrożeniowy · Maj 2026</div>
+    <div class="cover-kicker">Poradnik wdrożeniowy · Praktyka AI · Maj 2026</div>
     <h1 class="cover-title">
       AI w&nbsp;organizacji:<br>
-      od&nbsp;pomysłu do<br>
-      <em>realnego wdrożenia</em><br>
+      od&nbsp;pomysłu<br>
+      do&nbsp;<em>realnego<br>wdrożenia</em><br>
       w&nbsp;11&nbsp;krokach
     </h1>
-    <p class="cover-desc">Systematyczne podejście do wdrożeń AI — od identyfikacji potrzeb, przez przygotowanie danych, aż po uruchomienie systemu, który realnie wspiera codzienną pracę.</p>
   </div>
 
-  <div>
-    <div class="cover-rule"></div>
-    <div class="cover-foot">
-      <span>Quantica Lab</span>
-      <span>Maj 2026</span>
-    </div>
+  <div class="cover-foot">
+    <span>Quantica Lab</span>
+    <span>Maj 2026</span>
   </div>
 
 </div>
 
-<!-- ============================================================
-     TOC PAGE
-     ============================================================ -->
-<div class="toc-page">
 
-  <div class="toc-section-label">Spis treści</div>
-  <h2 class="toc-heading">AI w&nbsp;organizacji<br>w&nbsp;11&nbsp;krokach</h2>
+<!-- ══════════════════════════════════════
+     TABLE OF CONTENTS
+══════════════════════════════════════ -->
+<div class="pg" id="toc">
 
-  <ol class="toc-items">
-    <li>
-      <span class="toc-n">00</span>
-      <a href="#intro">Wprowadzenie — Od pomysłu do wdrożenia</a>
-      <span class="toc-dots"></span>
-      <span class="toc-pg"></span>
-    </li>
-    <li>
-      <span class="toc-n">01</span>
-      <a href="#ch01">Identyfikacja obszarów wdrożenia</a>
-      <span class="toc-dots"></span>
-      <span class="toc-pg"></span>
-    </li>
-    <li>
-      <span class="toc-n">02</span>
-      <a href="#ch02">Opracowanie scenariuszy użycia</a>
-      <span class="toc-dots"></span>
-      <span class="toc-pg"></span>
-    </li>
-    <li>
-      <span class="toc-n">03</span>
-      <a href="#ch03">Ocena gotowości organizacji do wdrożenia AI</a>
-      <span class="toc-dots"></span>
-      <span class="toc-pg"></span>
-    </li>
-    <li>
-      <span class="toc-n">04</span>
-      <a href="#ch04">Benchmark i wybór rozwiązania</a>
-      <span class="toc-dots"></span>
-      <span class="toc-pg"></span>
-    </li>
-    <li>
-      <span class="toc-n">05</span>
-      <a href="#ch05">Zdefiniowanie zakresu i planu wdrożenia</a>
-      <span class="toc-dots"></span>
-      <span class="toc-pg"></span>
-    </li>
-    <li>
-      <span class="toc-n">06</span>
-      <a href="#ch06">Przygotowanie i uporządkowanie danych</a>
-      <span class="toc-dots"></span>
-      <span class="toc-pg"></span>
-    </li>
-    <li>
-      <span class="toc-n">07</span>
-      <a href="#ch07">Wybór infrastruktury i architektury rozwiązania</a>
-      <span class="toc-dots"></span>
-      <span class="toc-pg"></span>
-    </li>
-    <li>
-      <span class="toc-n">08</span>
-      <a href="#ch08">Budowa bazy wiedzy i konfiguracja systemu</a>
-      <span class="toc-dots"></span>
-      <span class="toc-pg"></span>
-    </li>
-    <li>
-      <span class="toc-n">09</span>
-      <a href="#ch09">Testy użytkowe</a>
-      <span class="toc-dots"></span>
-      <span class="toc-pg"></span>
-    </li>
-    <li>
-      <span class="toc-n">10</span>
-      <a href="#ch10">Wdrożenie produkcyjne</a>
-      <span class="toc-dots"></span>
-      <span class="toc-pg"></span>
-    </li>
-    <li>
-      <span class="toc-n">11</span>
-      <a href="#ch11">Szkolenie użytkowników</a>
-      <span class="toc-dots"></span>
-      <span class="toc-pg"></span>
-    </li>
+  <div class="toc-label">Spis treści</div>
+  <h2 class="toc-title">AI w&nbsp;organizacji<br>w&nbsp;11&nbsp;krokach</h2>
+
+  <ol class="toc-list">
+    <li><span class="toc-n">00</span><span class="toc-t">Wprowadzenie — Od pomysłu do wdrożenia</span></li>
+    <li><span class="toc-n">01</span><span class="toc-t">Identyfikacja obszarów wdrożenia</span></li>
+    <li><span class="toc-n">02</span><span class="toc-t">Opracowanie scenariuszy użycia</span></li>
+    <li><span class="toc-n">03</span><span class="toc-t">Ocena gotowości organizacji do wdrożenia AI</span></li>
+    <li><span class="toc-n">04</span><span class="toc-t">Benchmark i wybór rozwiązania</span></li>
+    <li><span class="toc-n">05</span><span class="toc-t">Zdefiniowanie zakresu i planu wdrożenia</span></li>
+    <li><span class="toc-n">06</span><span class="toc-t">Przygotowanie i uporządkowanie danych</span></li>
+    <li><span class="toc-n">07</span><span class="toc-t">Wybór infrastruktury i architektury rozwiązania</span></li>
+    <li><span class="toc-n">08</span><span class="toc-t">Budowa bazy wiedzy i konfiguracja systemu</span></li>
+    <li><span class="toc-n">09</span><span class="toc-t">Testy użytkowe</span></li>
+    <li><span class="toc-n">10</span><span class="toc-t">Wdrożenie produkcyjne</span></li>
+    <li><span class="toc-n">11</span><span class="toc-t">Szkolenie użytkowników</span></li>
   </ol>
 
 </div>
 
-<!-- ============================================================
-     INTRO (00)
-     ============================================================ -->
-<div class="intro-section" id="intro">
 
-  <div class="intro-kicker">Wprowadzenie</div>
-  <h2>Od pomysłu do wdrożenia</h2>
+<!-- ══════════════════════════════════════
+     INTRO — 00
+══════════════════════════════════════ -->
+<div class="pg" id="intro">
 
-  <div class="chapter-body no-dropcap">
+  <div class="intro-head">
+    <h2>Od pomysłu do wdrożenia</h2>
+  </div>
+
+  <div class="body">
     <p>Większość organizacji nie zastanawia się już dziś, czy wdrażać AI, ale jak zrobić to w sposób, który przynosi realną wartość. Problem w tym, że wiele projektów kończy się na etapie pilotaży, które nie rozwiązują konkretnych problemów biznesowych. Wyzwaniem najczęściej nie jest sama technologia, ale brak uporządkowanej wiedzy i procesów, trudność w bezpiecznym wykorzystaniu danych oraz konieczność dostosowania się do zmieniających się wymogów regulacyjnych.</p>
     <p>W Quantica Lab do wdrożeń AI podchodzimy w sposób systematyczny. Zaczynamy nie od wyboru modelu czy narzędzia, ale od zrozumienia procesów i problemów, które rzeczywiście warto usprawnić, oraz oceny gotowości organizacji. Dopiero na tej podstawie projektujemy rozwiązania dopasowane do organizacji, jej procesów i danych.</p>
     <p>W artykule pokazujemy, jak wygląda taki proces krok po kroku: od identyfikacji potrzeb, przez przygotowanie danych, aż po uruchomienie systemu AI, który realnie wspiera codzienną pracę. Kolejne etapy omówimy na przykładzie systemu RAG (Retrieval-Augmented Generation), w którym odpowiedzi generowane są na podstawie dokumentów organizacji, takich jak regulaminy, procedury czy dokumentacja wewnętrzna.</p>
@@ -755,57 +623,54 @@ blockquote.pull::before {
 
 </div>
 
-<!-- ============================================================
+
+<!-- ══════════════════════════════════════
      KROK 01
-     ============================================================ -->
-<div class="chapter" id="ch01">
-  <div class="chapter-header">
-    <div class="ch-badge">
-      <span class="ch-num">01</span>
-    </div>
-    <div>
+══════════════════════════════════════ -->
+<div class="pg" id="ch01">
+  <div class="ch-head">
+    <div class="ch-num">01</div>
+    <div class="ch-meta">
       <div class="ch-label">Krok pierwszy</div>
       <h2>Identyfikacja obszarów wdrożenia</h2>
     </div>
   </div>
-  <div class="chapter-body">
+  <div class="body dropcap">
     <p>Pierwszym krokiem we wdrażaniu AI nie jest wybór technologii, lecz zrozumienie potrzeb organizacji. Praca nad projektem powinna się rozpocząć od identyfikacji obszarów, w których technologia może realnie usprawnić pracę, a więc od pytania „jaki problem chcemy rozwiązać?" zamiast „jakie narzędzie wybrać?". AI ma sens tylko wtedy, gdy odpowiada na konkretne potrzeby i przynosi mierzalne korzyści – w przeciwnym razie pozostaje eksperymentem.</p>
     <p>Punktem wyjścia powinno być zdefiniowanie miejsc, w których pracownicy tracą najwięcej czasu lub napotykają największe trudności. Najczęściej są to procesy związane z wyszukiwaniem informacji, pracą na rozproszonych dokumentach, przygotowywaniem odpowiedzi na powtarzające się pytania czy ręcznym przetwarzaniem danych. AI najlepiej sprawdza się jako wsparcie w zadaniach powtarzalnych, opartych na pracy z tekstem i danymi.</p>
   </div>
 </div>
 
-<!-- ============================================================
+
+<!-- ══════════════════════════════════════
      KROK 02
-     ============================================================ -->
-<div class="chapter" id="ch02">
-  <div class="chapter-header">
-    <div class="ch-badge">
-      <span class="ch-num">02</span>
-    </div>
-    <div>
+══════════════════════════════════════ -->
+<div class="pg" id="ch02">
+  <div class="ch-head">
+    <div class="ch-num">02</div>
+    <div class="ch-meta">
       <div class="ch-label">Krok drugi</div>
       <h2>Opracowanie scenariuszy użycia</h2>
     </div>
   </div>
-  <div class="chapter-body">
+  <div class="body dropcap">
     <p>Kolejnym krokiem jest opracowanie konkretnych scenariuszy użycia AI. Oznacza to przełożenie ogólnych obszarów, takich jak praca z dokumentami czy obsługa zapytań, na konkretne zadania. Dobrze zdefiniowany scenariusz powinien uwzględniać cel biznesowy, typ danych oraz oczekiwany sposób i jakość odpowiedzi. Warto rozpocząć od 2–3 scenariuszy, które można szybko zweryfikować w pilotażu. Takie podejście ogranicza ryzyko, przyspiesza wdrożenie i pozwala lepiej zrozumieć, gdzie AI przynosi największą wartość.</p>
   </div>
 </div>
 
-<!-- ============================================================
+
+<!-- ══════════════════════════════════════
      KROK 03
-     ============================================================ -->
-<div class="chapter" id="ch03">
-  <div class="chapter-header">
-    <div class="ch-badge">
-      <span class="ch-num">03</span>
-    </div>
-    <div>
+══════════════════════════════════════ -->
+<div class="pg" id="ch03">
+  <div class="ch-head">
+    <div class="ch-num">03</div>
+    <div class="ch-meta">
       <div class="ch-label">Krok trzeci</div>
       <h2>Ocena gotowości organizacji do wdrożenia AI</h2>
     </div>
   </div>
-  <div class="chapter-body">
+  <div class="body dropcap">
     <p>Po zdefiniowaniu obszarów wdrożenia warto również ocenić gotowość organizacji, w szczególności w obszarze danych, infrastruktury i kompetencji. Dzięki temu można określić realne możliwości wdrożenia i uniknąć błędnych założeń na dalszych etapach.</p>
     <p>Dane są jednym z kluczowych zasobów organizacji, ale ich wykorzystanie w projektach AI wymaga odpowiedniego przygotowania. Przez dane rozumiemy przede wszystkim dokumenty tekstowe (np. procedury, regulaminy, dokumentację techniczną czy korespondencję) zapisane w różnych formatach i przechowywane w różnych systemach, a także inne materiały – takie jak nagrania, wideo czy skany – które mogą zostać przekształcone do postaci tekstowej. Często są one rozproszone, mają nieustrukturyzowaną formę i są w różnym stopniu uporządkowane. Skuteczne wdrożenie nie polega wyłącznie na uruchomieniu modelu AI – wymaga także przemyślanego podejścia do jakości, aktualności i struktury danych. Warto więc odpowiedzieć na podstawowe pytania: jakie dane posiadamy, gdzie się znajdują i czy można je bezpiecznie wykorzystać. To właśnie jakość danych w największym stopniu determinuje jakość działania systemów AI.</p>
     <p>Drugim obszarem jest infrastruktura technologiczna, a więc wykorzystywane systemy, sposób przechowywania danych oraz możliwości integracji nowych rozwiązań z istniejącym środowiskiem IT. Kluczowe jest określenie, czy organizacja dysponuje zapleczem do uruchamiania systemów AI, czy konieczne będzie wykorzystanie infrastruktury zewnętrznej. Warto uwzględnić wymagania obliczeniowe – zaawansowane modele AI wymagają dostępu do wydajnych zasobów, w szczególności akceleratorów GPU. W sektorach regulowanych szczególne znaczenie mają bezpieczeństwo i lokalizacja danych, co często wymusza korzystanie z rozwiązań on-premise.</p>
@@ -813,57 +678,54 @@ blockquote.pull::before {
   </div>
 </div>
 
-<!-- ============================================================
+
+<!-- ══════════════════════════════════════
      KROK 04
-     ============================================================ -->
-<div class="chapter" id="ch04">
-  <div class="chapter-header">
-    <div class="ch-badge">
-      <span class="ch-num">04</span>
-    </div>
-    <div>
+══════════════════════════════════════ -->
+<div class="pg" id="ch04">
+  <div class="ch-head">
+    <div class="ch-num">04</div>
+    <div class="ch-meta">
       <div class="ch-label">Krok czwarty</div>
       <h2>Benchmark i wybór rozwiązania</h2>
     </div>
   </div>
-  <div class="chapter-body">
+  <div class="body dropcap">
     <p>Gdy wiemy już, co chcemy zbudować i znamy nasze uwarunkowania, pojawia się pytanie: które rozwiązanie rzeczywiście zadziała w naszej organizacji? Wybór nie powinien opierać się na popularności modeli AI ani deklaracjach producentów, lecz na ich rzeczywistym działaniu w kontekście własnych danych.</p>
     <p>Najlepszym sposobem takiej oceny jest przygotowanie benchmarku modeli AI – zestawu zadań i kryteriów, który pozwala porównać ich wyniki w tych samych warunkach. Benchmark bazujący na danych organizacji i odzwierciedlający rzeczywiste zastosowania pozwala szybko i rzetelnie ocenić jakość odpowiedzi, ich zgodność z danymi oraz dostosowanie do potrzeb organizacji. Dzięki temu możliwe jest przejście od deklaracji producentów do mierzalnej oceny i racjonalnej decyzji technologicznej.</p>
   </div>
 </div>
 
-<!-- ============================================================
+
+<!-- ══════════════════════════════════════
      KROK 05
-     ============================================================ -->
-<div class="chapter" id="ch05">
-  <div class="chapter-header">
-    <div class="ch-badge">
-      <span class="ch-num">05</span>
-    </div>
-    <div>
+══════════════════════════════════════ -->
+<div class="pg" id="ch05">
+  <div class="ch-head">
+    <div class="ch-num">05</div>
+    <div class="ch-meta">
       <div class="ch-label">Krok piąty</div>
       <h2>Zdefiniowanie zakresu i planu wdrożenia</h2>
     </div>
   </div>
-  <div class="chapter-body">
+  <div class="body dropcap">
     <p>Po zdefiniowaniu scenariuszy użycia, ocenie gotowości organizacji i wyborze podejścia można przejść do uruchomienia rozwiązania. Wdrożenie systemu AI, takiego jak RAG, nie jest jednorazowym działaniem, ale procesem obejmującym przygotowanie danych, konfigurację, testy i rozwój systemu. Zacząć należy od określenia szczegółowych celów wdrożenia oraz procesów objętych pilotażem. Równie ważne jest wskazanie użytkowników i kontekstu użycia: czy będzie to narzędzie wewnętrzne dla pracowników, czy rozwiązanie wspierające obsługę klientów. Pozwala to dopasować sposób działania systemu oraz zakres wykorzystywanych danych. Na tym etapie warto również określić mierniki sukcesu, takie jak jakość odpowiedzi, czas dostępu do informacji czy satysfakcja użytkowników. W praktyce wdrożenie zwykle rozpoczyna się od wybranych procesów lub grupy użytkowników, co pozwala szybko zweryfikować działanie systemu i ograniczyć ryzyko.</p>
   </div>
 </div>
 
-<!-- ============================================================
+
+<!-- ══════════════════════════════════════
      KROK 06
-     ============================================================ -->
-<div class="chapter" id="ch06">
-  <div class="chapter-header">
-    <div class="ch-badge">
-      <span class="ch-num">06</span>
-    </div>
-    <div>
+══════════════════════════════════════ -->
+<div class="pg" id="ch06">
+  <div class="ch-head">
+    <div class="ch-num">06</div>
+    <div class="ch-meta">
       <div class="ch-label">Krok szósty</div>
       <h2>Przygotowanie i uporządkowanie danych</h2>
     </div>
   </div>
-  <div class="chapter-body">
+  <div class="body dropcap">
     <p>Przygotowanie danych to jeden z najważniejszych, a zarazem najbardziej czasochłonnych etapów wdrożenia. Ich źródłem mogą być istniejące repozytoria dokumentów, materiały przygotowane ręcznie lub dane z systemów wewnętrznych – pod warunkiem odpowiedniego uporządkowania i ujednolicenia.</p>
     <p>Proces rozpoczyna się od selekcji dokumentów. Do bazy wiedzy powinny trafiać wyłącznie materiały aktualne, kompletne i istotne z punktu widzenia użytkownika. Oznacza to konieczność odrzucenia treści o niskiej wartości, takich jak fragmentaryczne notatki czy nieaktualne prezentacje.</p>
     <p>Następnie dokumenty przygotowywane są do przetwarzania: konwertowane do jednolitej postaci tekstowej oraz oczyszczane z elementów utrudniających analizę. Warto przy tym pamiętać, że dane nie muszą pierwotnie mieć formy tekstowej. Coraz częściej systemy AI umożliwiają również przetwarzanie materiałów audio, wideo czy skanów dokumentów. W przypadku danych osobowych konieczne jest przygotowanie dokumentów zgodnie z zasadą minimalizacji i obowiązującymi regulacjami.</p>
@@ -871,20 +733,19 @@ blockquote.pull::before {
   </div>
 </div>
 
-<!-- ============================================================
+
+<!-- ══════════════════════════════════════
      KROK 07
-     ============================================================ -->
-<div class="chapter" id="ch07">
-  <div class="chapter-header">
-    <div class="ch-badge">
-      <span class="ch-num">07</span>
-    </div>
-    <div>
+══════════════════════════════════════ -->
+<div class="pg" id="ch07">
+  <div class="ch-head">
+    <div class="ch-num">07</div>
+    <div class="ch-meta">
       <div class="ch-label">Krok siódmy</div>
       <h2>Wybór infrastruktury i architektury rozwiązania</h2>
     </div>
   </div>
-  <div class="chapter-body">
+  <div class="body dropcap">
     <p>Wybór infrastruktury i architektury rozwiązania AI ma długofalowe konsekwencje dla bezpieczeństwa, kosztów i możliwości rozwoju organizacji. W sektorach regulowanych i infrastrukturze krytycznej, decyzje te muszą uwzględniać nie tylko aspekty technologiczne, ale przede wszystkim wymagania regulacyjne. Kluczowym kryterium jest bezpieczeństwo danych i zgodność z regulacjami, w tym dyrektywą NIS2 oraz przepisami RODO. Oznacza to konieczność pełnej kontroli nad tym, gdzie dane są przechowywane, kto ma do nich dostęp i w jaki sposób są przetwarzane.</p>
 
     <p>W praktyce organizacje wybierają pomiędzy modelem chmurowym albo on-premise. Model chmurowy zapewnia skalowalność i szybkie wdrożenie, ale wiąże się z przekazaniem danych zewnętrznemu dostawcy. Model on-premise daje pełną kontrolę nad danymi, jednak wymaga własnej infrastruktury i kompetencji technicznych. Alternatywnym rozwiązaniem jest model hybrydowy, który łączy oba podejścia, umożliwiając pozostawienie danych wrażliwych wewnątrz organizacji.</p>
@@ -892,7 +753,7 @@ blockquote.pull::before {
     <div class="contrast">
       <div>
         <h4>Model chmurowy</h4>
-        <p>Skalowalność i szybkie wdrożenie, ale dane trafiają do zewnętrznego dostawcy.</p>
+        <p>Skalowalność i szybkie wdrożenie, ale dane przekazywane zewnętrznemu dostawcy.</p>
       </div>
       <div>
         <h4>Model on-premise</h4>
@@ -905,20 +766,19 @@ blockquote.pull::before {
   </div>
 </div>
 
-<!-- ============================================================
+
+<!-- ══════════════════════════════════════
      KROK 08
-     ============================================================ -->
-<div class="chapter" id="ch08">
-  <div class="chapter-header">
-    <div class="ch-badge">
-      <span class="ch-num">08</span>
-    </div>
-    <div>
+══════════════════════════════════════ -->
+<div class="pg" id="ch08">
+  <div class="ch-head">
+    <div class="ch-num">08</div>
+    <div class="ch-meta">
       <div class="ch-label">Krok ósmy</div>
       <h2>Budowa bazy wiedzy i konfiguracja systemu</h2>
     </div>
   </div>
-  <div class="chapter-body">
+  <div class="body dropcap">
     <p>Po przygotowaniu i podziale dokumentów na mniejsze fragmenty rozpoczyna się etap budowy bazy wiedzy oraz konfiguracji systemu. Każdy fragment przetwarzany jest na dwie uzupełniające się reprezentacje: semantyczną oraz tekstową, wykorzystywaną w klasycznym wyszukiwaniu opartym na słowach kluczowych. Takie podejście pozwala połączyć rozumienie kontekstu i znaczenia z precyzyjnym dopasowaniem konkretnych terminów. W efekcie system potrafi odnaleźć zarówno treści semantycznie powiązane z pytaniem, jak i te zawierające dokładne sformułowania użyte przez użytkownika.</p>
     <p>W momencie zadania pytania system wyszukuje najbardziej trafne fragmenty dokumentów, a następnie dodatkowo ocenia i porządkuje wyniki tak, aby do modelu językowego trafiły wyłącznie najlepiej dopasowane informacje.</p>
     <p>Na tej podstawie model generuje odpowiedź. Otrzymuje on zarówno pytanie użytkownika, jak i wybrane fragmenty dokumentów stanowiące kontekst. Dzięki temu odpowiedź opiera się na rzeczywistych danych organizacji, a nie wyłącznie na wiedzy modelu, co znacząco ogranicza ryzyko błędów i tzw. halucynacji.</p>
@@ -926,20 +786,19 @@ blockquote.pull::before {
   </div>
 </div>
 
-<!-- ============================================================
+
+<!-- ══════════════════════════════════════
      KROK 09
-     ============================================================ -->
-<div class="chapter" id="ch09">
-  <div class="chapter-header">
-    <div class="ch-badge">
-      <span class="ch-num">09</span>
-    </div>
-    <div>
+══════════════════════════════════════ -->
+<div class="pg" id="ch09">
+  <div class="ch-head">
+    <div class="ch-num">09</div>
+    <div class="ch-meta">
       <div class="ch-label">Krok dziewiąty</div>
       <h2>Testy użytkowe</h2>
     </div>
   </div>
-  <div class="chapter-body">
+  <div class="body dropcap">
     <p>Po uruchomieniu systemu kluczowym etapem są testy oraz jego stopniowe doskonalenie. Rozwiązania oparte na AI wymagają iteracyjnego podejścia – ich jakość poprawia się wraz z kolejnymi cyklami testów i modyfikacji.</p>
     <p>Istotną rolę odgrywa wcześniej przygotowany benchmark, który pozwala w uporządkowany sposób ocenić działanie systemu oraz porównywać różne warianty rozwiązania. Jest on dopasowany do konkretnych danych i scenariuszy użycia, najczęściej w postaci zestawu pytań i oczekiwanych odpowiedzi lub kryteriów, które odpowiedź powinna spełniać. Pozwala to określić poziom jakości systemu i monitorować jego poprawę w czasie.</p>
     <p>Równolegle prowadzone są testy manualne, realizowane przez zamkniętą grupę przeszkolonych użytkowników, najczęściej pracowników organizacji. Opierają się one na rzeczywistych zapytaniach i scenariuszach pracy, co pozwala ocenić nie tylko poprawność odpowiedzi, ale także ich użyteczność i dopasowanie do kontekstu. Istotnym elementem tego etapu jest zbieranie ustrukturyzowanego feedbacku dotyczącego jakości odpowiedzi – ich trafności, kompletności czy zgodności ze źródłami. Dzięki temu możliwe jest szybkie wychwycenie problemów niewidocznych w testach automatycznych, takich jak zbyt ogólne odpowiedzi czy nieodpowiedni styl komunikacji.</p>
@@ -947,20 +806,19 @@ blockquote.pull::before {
   </div>
 </div>
 
-<!-- ============================================================
+
+<!-- ══════════════════════════════════════
      KROK 10
-     ============================================================ -->
-<div class="chapter" id="ch10">
-  <div class="chapter-header">
-    <div class="ch-badge">
-      <span class="ch-num">10</span>
-    </div>
-    <div>
+══════════════════════════════════════ -->
+<div class="pg" id="ch10">
+  <div class="ch-head">
+    <div class="ch-num">10</div>
+    <div class="ch-meta">
       <div class="ch-label">Krok dziesiąty</div>
       <h2>Wdrożenie produkcyjne</h2>
     </div>
   </div>
-  <div class="chapter-body">
+  <div class="body dropcap">
     <p>Wdrożenie rozwiązania w środowisku produkcyjnym oznacza przejście od testów do codziennego wykorzystania w organizacji. Na tym etapie kluczowe stają się stabilność, wydajność oraz kontrola nad działaniem systemu. W praktyce oznacza to konieczność zadbania o kilka obszarów: aktualność bazy wiedzy, wydajność działania, jakość odpowiedzi oraz bezpieczeństwo dostępu do danych.</p>
     <p>Baza wiedzy nie jest statyczna – pojawiają się nowe dokumenty, a istniejące wymagają aktualizacji. Proces ten powinien być możliwie zautomatyzowany i realizowany w sposób, który nie zakłóca działania systemu.</p>
     <p>Istotna jest również wydajność rozwiązania. System musi obsługiwać wielu użytkowników jednocześnie i dostarczać odpowiedzi w akceptowalnym czasie. W praktyce wymaga to optymalizacji całego procesu – od wyszukiwania informacji po generowanie odpowiedzi – oraz dopasowania infrastruktury do rzeczywistych potrzeb.</p>
@@ -970,20 +828,19 @@ blockquote.pull::before {
   </div>
 </div>
 
-<!-- ============================================================
+
+<!-- ══════════════════════════════════════
      KROK 11
-     ============================================================ -->
-<div class="chapter" id="ch11">
-  <div class="chapter-header">
-    <div class="ch-badge">
-      <span class="ch-num">11</span>
-    </div>
-    <div>
+══════════════════════════════════════ -->
+<div class="pg" id="ch11">
+  <div class="ch-head">
+    <div class="ch-num">11</div>
+    <div class="ch-meta">
       <div class="ch-label">Krok jedenasty</div>
       <h2>Szkolenie użytkowników</h2>
     </div>
   </div>
-  <div class="chapter-body">
+  <div class="body dropcap">
     <p>Nawet najlepiej zaprojektowany system AI nie przyniesie oczekiwanych rezultatów, jeśli jego użytkownicy nie będą wiedzieli, jak z niego korzystać – i dlaczego warto to robić. Szkolenie jest krytycznym elementem każdego wdrożenia, a jego pominięcie lub nieodpowiednie przygotowanie należy do najczęstszych przyczyn problemów z wykorzystaniem nowych narzędzi. Dotyczy to w szczególności rozwiązań opartych na AI, które zmieniają nie tylko narzędzia pracy, ale również sposób wykonywania zadań.</p>
     <p>Skuteczne szkolenie powinno obejmować trzy komplementarne wymiary. Pierwszy to zbudowanie podstawowego zrozumienia działania AI i modeli językowych. Nie chodzi tu o wykład z informatyki, lecz o przekazanie intuicyjnego zrozumienia, jak działa system i jakie ma ograniczenia.</p>
     <p>Drugi wymiar dotyczy konkretnego narzędzia wdrożonego w organizacji. Użytkownicy powinni wiedzieć, czego mogą się spodziewać: że system opiera się na określonej bazie wiedzy, że jakość odpowiedzi zależy od sposobu zadawania pytań oraz że w niektórych sytuacjach konieczna jest weryfikacja uzyskanych informacji.</p>
@@ -992,10 +849,11 @@ blockquote.pull::before {
   </div>
 </div>
 
-<!-- ============================================================
-     CLOSING PAGE
-     ============================================================ -->
-<div class="closing-page">
+
+<!-- ══════════════════════════════════════
+     CLOSING
+══════════════════════════════════════ -->
+<div class="pg closing">
 
   <div class="closing-brand"><strong>Quantica</strong> Labs</div>
 
@@ -1022,19 +880,17 @@ blockquote.pull::before {
 
 </div>
 
-<!-- Paged.js — CSS Paged Media polyfill -->
-<script src="https://unpkg.com/pagedjs/dist/paged.polyfill.js"></script>
-
 <script>
-  // Move control bar above Paged.js page wrapper after pagination
-  window.PagedConfig = {
-    auto: true,
-    after(flow) {
-      // Paged.js is done — make sure control bar stays on top
-      const bar = document.getElementById('controls');
-      if (bar) document.body.appendChild(bar);
-    }
-  };
+  // Swap oklch-based vars to plain hex before printing
+  window.addEventListener('beforeprint', () => {
+    document.documentElement.style.setProperty('--accent', '#c4502c');
+    document.documentElement.style.setProperty('--ink',   '#1a1410');
+    document.documentElement.style.setProperty('--paper', '#f4ede1');
+  });
+  window.addEventListener('afterprint', () => {
+    ['--accent','--ink','--paper'].forEach(v =>
+      document.documentElement.style.removeProperty(v));
+  });
 </script>
 
 </body>
