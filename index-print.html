@@ -45,7 +45,7 @@
   --h:   297mm;
   --ml:  22mm;
   --mr:  18mm;
-  --mt:  20mm;   /* screen preview padding; mirrors the @page margins */
+  --mt:  20mm;   /* page margins of the article flow (screen + print) */
   --mb:  18mm;
 }
 
@@ -82,16 +82,11 @@ body {
 #bar button:hover { background: var(--deep-berry); }
 
 /* ─── Page setup ─── */
-/* Article pages get real margins; the empty margin boxes make Chrome skip its own
-   date / title / URL / page-number header and footer (verified on Chrome 151). */
-@page {
-  size: A4;
-  margin: 20mm 18mm 20mm 22mm;
-  @top-left { content: ""; }    @top-center { content: ""; }    @top-right { content: ""; }
-  @bottom-left { content: ""; } @bottom-center { content: ""; } @bottom-right { content: ""; }
-}
-/* Cover and closing are full-bleed */
-@page full { margin: 0; }
+/* Zero page margins: neither Chrome nor Firefox has room to print its own
+   date / title / URL / page-number header and footer. The article's page
+   margins are rebuilt as padding on .flow, repeated on every printed page
+   by box-decoration-break: clone (works in Chrome and Firefox). */
+@page { size: A4; margin: 0; }
 
 /* ─── Screen: A4 sheet preview ─── */
 @media screen {
@@ -107,10 +102,14 @@ body {
 /* ─── Print ─── */
 @media print {
   #bar { display: none !important; }
-  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-  .pg { page: full; width: var(--w); }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+  .pg { width: var(--w); }
   .pg.cover { break-after: page; }
   .pg.closing { break-before: page; }
+  .flow {
+    padding: var(--mt) var(--mr) var(--mb) var(--ml);
+    -webkit-box-decoration-break: clone; box-decoration-break: clone;
+  }
 }
 
 /* ─── Dark full-bleed pages (cover + closing) ─── */

@@ -312,21 +312,21 @@ canvas[data-dots] { position: absolute; inset: 0; width: 100%; height: 100%; poi
   * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }
 
-/* ─── Print ("Pobierz PDF" / Ctrl+P): navy cover page, then the article as one flow ─── */
-/* Empty margin boxes make Chrome skip its own date / title / URL / page-number header and footer. */
-@page {
-  size: A4;
-  margin: 20mm 18mm 20mm 22mm;
-  @top-left { content: ""; }    @top-center { content: ""; }    @top-right { content: ""; }
-  @bottom-left { content: ""; } @bottom-center { content: ""; } @bottom-right { content: ""; }
-}
-@page full { margin: 0; }
+/* ─── Print ("Pobierz PDF" / Ctrl+P): navy cover page, the article as one flow, navy closing page ─── */
+/* Zero page margins: neither Chrome nor Firefox has room to print its own
+   date / title / URL / page-number header and footer. Article margins are
+   padding on <main>, repeated on every page by box-decoration-break: clone. */
+@page { size: A4; margin: 0; }
 @media print {
-  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+  main {
+    padding: 20mm 18mm 20mm 22mm;
+    -webkit-box-decoration-break: clone; box-decoration-break: clone;
+  }
   .nav, .sr-only, canvas[data-dots], .hero-actions, #toc, .contact-pills, .footer { display: none !important; }
   .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
   .hero {
-    page: full; height: 297mm; min-height: 0; padding: 22mm 22mm 36mm;
+    height: 297mm; min-height: 0; padding: 22mm 22mm 36mm;
     align-items: flex-end; break-after: page;
   }
   .hero-q { width: 130mm; right: -42mm; top: 34mm; transform: none; }
@@ -335,6 +335,7 @@ canvas[data-dots] { position: absolute; inset: 0; width: 100%; height: 100%; poi
   .hero-footer.wrap { bottom: 14mm; padding: 0 22mm; }
   .section { padding: 0; background: none; }
   .section + .section { margin-top: 14mm; }
+  #intro { margin-top: 0; }
   .wrap { padding: 0; max-width: none; }
   .chapter-grid { display: block; }
   .chapter-side {
@@ -348,7 +349,7 @@ canvas[data-dots] { position: absolute; inset: 0; width: 100%; height: 100%; poi
   .chapter-body p { font-size: 10.5pt; line-height: 1.62; orphans: 2; widows: 2; text-align: justify; hyphens: auto; }
   .pull { break-inside: avoid; box-shadow: none; margin: 7mm 0; }
   .pull p { font-size: 13pt; }
-  #kontakt { page: full; break-before: page; margin: 0; }
+  #kontakt { break-before: page; margin: 0; }
   .contact {
     height: 297mm; border-radius: 0; padding: 22mm;
     display: flex; flex-direction: column; justify-content: flex-end;
@@ -637,6 +638,9 @@ canvas[data-dots] { position: absolute; inset: 0; width: 100%; height: 100%; poi
   </div>
 </section>
 
+
+</main>
+
 <section class="section" id="kontakt">
   <div class="wrap reveal">
     <div class="contact">
@@ -656,8 +660,6 @@ canvas[data-dots] { position: absolute; inset: 0; width: 100%; height: 100%; poi
     </div>
   </div>
 </section>
-
-</main>
 
 <footer class="footer">
   <div class="wrap"><div>Quantica Labs</div><div>Praktyka AI · Maj 2026 · Numer drugi</div></div>
