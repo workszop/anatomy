@@ -41,7 +41,7 @@
   --h:   297mm;
   --ml:  22mm;
   --mr:  18mm;
-  --mt:  20mm;   /* top pad - running header lives inside this band */
+  --mt:  20mm;   /* screen preview padding; mirrors the @page margins */
   --mb:  18mm;
 }
 
@@ -77,30 +77,36 @@ body {
 }
 #bar button:hover { background: var(--deep-berry); }
 
-/* ─── Screen: A4 card preview ─── */
+/* ─── Page setup ─── */
+/* Article pages get real margins; the empty margin boxes make Chrome skip its own
+   date / title / URL / page-number header and footer (verified on Chrome 151). */
+@page {
+  size: A4;
+  margin: 20mm 18mm 20mm 22mm;
+  @top-left { content: ""; }    @top-center { content: ""; }    @top-right { content: ""; }
+  @bottom-left { content: ""; } @bottom-center { content: ""; } @bottom-right { content: ""; }
+}
+/* Cover and closing are full-bleed */
+@page full { margin: 0; }
+
+/* ─── Screen: A4 sheet preview ─── */
 @media screen {
   body { background: var(--desk); padding: 76px 20px 72px; }
-  .pg {
-    width: var(--w); min-height: var(--h); background: var(--bg-1);
+  .pg, .flow {
+    width: var(--w); background: var(--bg-1);
     box-shadow: var(--page-shadow);
     margin: 0 auto 20px;
-    padding: var(--mt) var(--mr) var(--mb) var(--ml);
   }
+  .flow { padding: var(--mt) var(--mr) var(--mb) var(--ml); }
 }
 
-/* ─── Print: page setup ─── */
-/* margin:0 means Chrome has no space to render its URL/date/page-number text */
+/* ─── Print ─── */
 @media print {
-  @page { size: A4; margin: 0; }
   #bar { display: none !important; }
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-  .pg {
-    width: var(--w);
-    padding: var(--mt) var(--mr) var(--mb) var(--ml);
-    break-before: page;
-    position: relative;
-  }
-  .pg.cover { break-before: auto; }
+  .pg { page: full; width: var(--w); }
+  .pg.cover { break-after: page; }
+  .pg.closing { break-before: page; }
 }
 
 /* ─── Dark full-bleed pages (cover + closing) ─── */
@@ -112,7 +118,6 @@ body {
   display: flex; flex-direction: column; justify-content: space-between;
   padding: 22mm !important;
   position: relative; overflow: hidden;
-  z-index: 10;   /* sits above the fixed running header in print */
 }
 .pg.closing {
   background:
@@ -128,19 +133,6 @@ body {
 .pg.cover > *, .pg.closing > * { position: relative; z-index: 1; }
 .pg.cover > .ghost-q, .pg.closing > .ghost-q { position: absolute; z-index: 0; }
 
-/* ─── Running header (position:fixed → every printed page) ─── */
-.rh { display: none; }
-@media print {
-  .rh {
-    display: flex; position: fixed; top: 8mm; left: var(--ml); right: var(--mr);
-    justify-content: space-between; align-items: flex-end;
-    padding-bottom: 2.5mm; border-bottom: 0.5pt solid var(--border-1);
-    font-family: var(--font-mono); font-size: 7pt; letter-spacing: 0.12em;
-    text-transform: uppercase; color: var(--fg-3); z-index: 1;
-  }
-  .rh b { color: var(--quantica-pink); font-weight: 500; }
-}
-
 /* ─── Cover ─── */
 .cv-brand { display: flex; align-items: center; gap: 5mm; }
 .cv-brand img { height: 12mm; width: auto; display: block; }
@@ -150,7 +142,7 @@ body {
   border-left: 0.5pt solid var(--rule-on-ink); padding-left: 5mm;
 }
 .cv-main { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 6mm; }
-.cv-kicker, .cl-kicker, .cl-label, .toc-label {
+.cv-kicker, .cl-kicker, .cl-label {
   font-family: var(--font-mono); font-weight: 500; font-size: 8pt;
   letter-spacing: 0.14em; text-transform: uppercase; color: var(--quantica-pink);
 }
@@ -171,24 +163,6 @@ body {
   display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4mm 10mm;
 }
 .cv-byline b { color: var(--white); font-weight: 500; }
-
-/* ─── Table of contents ─── */
-.toc-label { margin-bottom: 5mm; }
-.toc-head {
-  font-family: var(--font-display); font-weight: 700; font-size: 28pt;
-  letter-spacing: -0.025em; line-height: 1.05; color: var(--fg-1); margin-bottom: 12mm;
-}
-.toc-list { list-style: none; border-top: 0.5pt solid var(--fg-1); }
-.toc-list li {
-  display: grid; grid-template-columns: 12mm 1fr; gap: 0 4mm; align-items: baseline;
-  padding: 4mm 0; border-bottom: 0.5pt solid var(--border-1);
-  break-inside: avoid;
-}
-.toc-n {
-  font-family: var(--font-display); font-weight: 800; font-size: 14pt;
-  letter-spacing: -0.03em; color: var(--quantica-pink);
-}
-.toc-t { font-weight: 600; font-size: 11pt; line-height: 1.35; color: var(--fg-1); }
 
 /* ─── Chapter header ─── */
 .ch-head {
@@ -215,10 +189,14 @@ h2 {
 }
 h2 em { font-style: normal; color: var(--quantica-pink); }
 
+/* ─── Article flow: one continuous run, the browser paginates ─── */
+.block + .block { margin-top: 14mm; }
+.ch-head, .intro-head, h2 { break-inside: avoid; break-after: avoid; }
+
 /* ─── Body text ─── */
 .body p {
   margin-bottom: 0.85em; text-align: justify;
-  hyphens: auto; -webkit-hyphens: auto; orphans: 3; widows: 3;
+  hyphens: auto; -webkit-hyphens: auto; orphans: 2; widows: 2;
 }
 
 /* ─── Pull quote (full pink border, never a stripe) ─── */
@@ -263,13 +241,6 @@ blockquote.pull::before {
 </head>
 <body>
 
-<!-- Running header: position:fixed → repeats on every printed page.
-     Cover and closing pages cover it with opaque dark background + z-index:10. -->
-<div class="rh">
-  <span><b>Quantica</b> Labs · Praktyka AI</span>
-  <span>AI w organizacji · 11 kroków</span>
-</div>
-
 <!-- Screen control bar (hidden in print) -->
 <div id="bar">
   <span class="bl"><em>Quantica Labs</em> · Wersja do druku · AI w organizacji: od pomysłu do realnego wdrożenia AI w 11 krokach</span>
@@ -302,35 +273,12 @@ blockquote.pull::before {
 </div>
 
 
-<!-- ══════════════════════════════════
-     TABLE OF CONTENTS
-══════════════════════════════════ -->
-<div class="pg" id="toc">
-
-  <div class="toc-label">Spis treści</div>
-  <h2 class="toc-head">AI w&nbsp;organizacji<br>w&nbsp;11&nbsp;krokach</h2>
-
-  <ol class="toc-list">
-    <li><span class="toc-n">01</span><span class="toc-t">Identyfikacja obszarów wdrożenia</span></li>
-    <li><span class="toc-n">02</span><span class="toc-t">Opracowanie scenariuszy użycia</span></li>
-    <li><span class="toc-n">03</span><span class="toc-t">Ocena gotowości organizacji do wdrożenia AI</span></li>
-    <li><span class="toc-n">04</span><span class="toc-t">Benchmark i wybór rozwiązania</span></li>
-    <li><span class="toc-n">05</span><span class="toc-t">Zdefiniowanie zakresu i planu wdrożenia</span></li>
-    <li><span class="toc-n">06</span><span class="toc-t">Przygotowanie i uporządkowanie danych</span></li>
-    <li><span class="toc-n">07</span><span class="toc-t">Wybór infrastruktury i architektury rozwiązania</span></li>
-    <li><span class="toc-n">08</span><span class="toc-t">Budowa bazy wiedzy i konfiguracja systemu</span></li>
-    <li><span class="toc-n">09</span><span class="toc-t">Testy użytkowe</span></li>
-    <li><span class="toc-n">10</span><span class="toc-t">Wdrożenie produkcyjne</span></li>
-    <li><span class="toc-n">11</span><span class="toc-t">Szkolenie użytkowników</span></li>
-  </ol>
-
-</div>
-
+<main class="flow">
 
 <!-- ══════════════════════════════════
      INTRO - 00
 ══════════════════════════════════ -->
-<div class="pg" id="intro">
+<div class="block" id="intro">
 
   <div class="intro-head">
     <h2>Od pomysłu do wdrożenia</h2>
@@ -354,7 +302,7 @@ blockquote.pull::before {
 <!-- ══════════════════════════════════
      KROK 01
 ══════════════════════════════════ -->
-<div class="pg" id="ch01">
+<div class="block" id="ch01">
   <div class="ch-head">
     <div class="ch-num">01</div>
     <div class="ch-meta">
@@ -372,7 +320,7 @@ blockquote.pull::before {
 <!-- ══════════════════════════════════
      KROK 02
 ══════════════════════════════════ -->
-<div class="pg" id="ch02">
+<div class="block" id="ch02">
   <div class="ch-head">
     <div class="ch-num">02</div>
     <div class="ch-meta">
@@ -389,7 +337,7 @@ blockquote.pull::before {
 <!-- ══════════════════════════════════
      KROK 03
 ══════════════════════════════════ -->
-<div class="pg" id="ch03">
+<div class="block" id="ch03">
   <div class="ch-head">
     <div class="ch-num">03</div>
     <div class="ch-meta">
@@ -409,7 +357,7 @@ blockquote.pull::before {
 <!-- ══════════════════════════════════
      KROK 04
 ══════════════════════════════════ -->
-<div class="pg" id="ch04">
+<div class="block" id="ch04">
   <div class="ch-head">
     <div class="ch-num">04</div>
     <div class="ch-meta">
@@ -427,7 +375,7 @@ blockquote.pull::before {
 <!-- ══════════════════════════════════
      KROK 05
 ══════════════════════════════════ -->
-<div class="pg" id="ch05">
+<div class="block" id="ch05">
   <div class="ch-head">
     <div class="ch-num">05</div>
     <div class="ch-meta">
@@ -444,7 +392,7 @@ blockquote.pull::before {
 <!-- ══════════════════════════════════
      KROK 06
 ══════════════════════════════════ -->
-<div class="pg" id="ch06">
+<div class="block" id="ch06">
   <div class="ch-head">
     <div class="ch-num">06</div>
     <div class="ch-meta">
@@ -464,7 +412,7 @@ blockquote.pull::before {
 <!-- ══════════════════════════════════
      KROK 07
 ══════════════════════════════════ -->
-<div class="pg" id="ch07">
+<div class="block" id="ch07">
   <div class="ch-head">
     <div class="ch-num">07</div>
     <div class="ch-meta">
@@ -484,7 +432,7 @@ blockquote.pull::before {
 <!-- ══════════════════════════════════
      KROK 08
 ══════════════════════════════════ -->
-<div class="pg" id="ch08">
+<div class="block" id="ch08">
   <div class="ch-head">
     <div class="ch-num">08</div>
     <div class="ch-meta">
@@ -504,7 +452,7 @@ blockquote.pull::before {
 <!-- ══════════════════════════════════
      KROK 09
 ══════════════════════════════════ -->
-<div class="pg" id="ch09">
+<div class="block" id="ch09">
   <div class="ch-head">
     <div class="ch-num">09</div>
     <div class="ch-meta">
@@ -524,7 +472,7 @@ blockquote.pull::before {
 <!-- ══════════════════════════════════
      KROK 10
 ══════════════════════════════════ -->
-<div class="pg" id="ch10">
+<div class="block" id="ch10">
   <div class="ch-head">
     <div class="ch-num">10</div>
     <div class="ch-meta">
@@ -546,7 +494,7 @@ blockquote.pull::before {
 <!-- ══════════════════════════════════
      KROK 11
 ══════════════════════════════════ -->
-<div class="pg" id="ch11">
+<div class="block" id="ch11">
   <div class="ch-head">
     <div class="ch-num">11</div>
     <div class="ch-meta">
@@ -562,6 +510,9 @@ blockquote.pull::before {
     <p>Niezależnie od wewnętrznych potrzeb organizacji, obowiązek prowadzenia szkoleń wynika również z regulacji prawnych. AI Act nakłada na podmioty wykorzystujące systemy AI obowiązek zapewnienia odpowiedniego poziomu wiedzy użytkowników. Oznacza to, że szkolenia z zakresu AI nie są jedynie dobrą praktyką, lecz wymogiem regulacyjnym, który powinien zostać uwzględniony w planie każdego wdrożenia.</p>
   </div>
 </div>
+
+
+</main>
 
 
 <!-- ══════════════════════════════════

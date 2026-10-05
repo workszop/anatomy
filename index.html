@@ -308,26 +308,51 @@ canvas[data-dots] { position: absolute; inset: 0; width: 100%; height: 100%; poi
   * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }
 
-/* ─── Print (Ctrl+P on this page; the A4 layout lives in index-print.html) ─── */
+/* ─── Print ("Pobierz PDF" / Ctrl+P): navy cover page, then the article as one flow ─── */
+/* Empty margin boxes make Chrome skip its own date / title / URL / page-number header and footer. */
+@page {
+  size: A4;
+  margin: 20mm 18mm 20mm 22mm;
+  @top-left { content: ""; }    @top-center { content: ""; }    @top-right { content: ""; }
+  @bottom-left { content: ""; } @bottom-center { content: ""; } @bottom-right { content: ""; }
+}
+@page full { margin: 0; }
 @media print {
-  @page { size: A4; margin: 14mm 16mm; }
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-  .nav, canvas[data-dots], .hero-actions, .contact-pills { display: none !important; }
-  .reveal { opacity: 1 !important; transform: none !important; }
-  .hero { min-height: 0; padding: 18mm 12mm 22mm; border-radius: var(--radius-lg); }
-  .hero-title { font-size: 40pt; }
-  .hero-tagline { font-size: 13pt; }
-  .section { padding: 10mm 0; background: none; }
+  .nav, .sr-only, canvas[data-dots], .hero-actions, #toc, .contact-pills, .footer { display: none !important; }
+  .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .hero {
+    page: full; height: 297mm; min-height: 0; padding: 22mm 22mm 36mm;
+    align-items: flex-end; break-after: page;
+  }
+  .hero-q { width: 130mm; right: -42mm; top: 34mm; transform: none; }
+  .hero-title { font-size: 38pt; }
+  .hero-tagline { font-size: 12.5pt; }
+  .hero-footer.wrap { bottom: 14mm; padding: 0 22mm; }
+  .section { padding: 0; background: none; }
+  .section + .section { margin-top: 14mm; }
   .wrap { padding: 0; max-width: none; }
-  .chapter { break-inside: auto; }
-  .chapter-grid { grid-template-columns: 1fr; gap: 4mm; }
-  .chapter-side { position: static; display: flex; align-items: baseline; gap: 12px; flex-direction: row-reverse; justify-content: flex-end; }
+  .chapter-grid { display: block; }
+  .chapter-side {
+    position: static; display: flex; align-items: baseline; gap: 12px;
+    flex-direction: row-reverse; justify-content: flex-end; margin-bottom: 2mm;
+    break-inside: avoid; break-after: avoid;
+  }
   .ch-num { font-size: 32pt; margin: 0; }
-  .h-section { font-size: 20pt; break-after: avoid; }
+  .h-section { font-size: 20pt; margin-bottom: 6mm; break-inside: avoid; break-after: avoid; }
   .chapter-body { max-width: none; }
-  .chapter-body p { font-size: 10.5pt; line-height: 1.6; orphans: 3; widows: 3; text-align: justify; hyphens: auto; }
-  .cell { box-shadow: none; break-inside: avoid; }
-  .contact { break-inside: avoid; }
+  .chapter-body p { font-size: 10.5pt; line-height: 1.62; orphans: 2; widows: 2; text-align: justify; hyphens: auto; }
+  .pull { break-inside: avoid; box-shadow: none; margin: 7mm 0; }
+  .pull p { font-size: 13pt; }
+  #kontakt { page: full; break-before: page; margin: 0; }
+  .contact {
+    height: 297mm; border-radius: 0; padding: 22mm;
+    display: flex; flex-direction: column; justify-content: flex-end;
+  }
+  .contact-q { width: 130mm; right: -42mm; top: 34mm; transform: none; }
+  .contact h2 { font-size: 34pt; margin-bottom: 9mm; }
+  .contact p { font-size: 11pt; line-height: 1.62; max-width: 150mm; }
+  .contact-info { margin-top: 12mm; }
 }
 </style>
 </head>
